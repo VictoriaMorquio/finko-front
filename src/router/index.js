@@ -150,7 +150,15 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    // Si hay una posición guardada (navegación con botón atrás/adelante), usarla
+    if (savedPosition) {
+      return savedPosition
+    }
+    // Si no, siempre ir al top de la página
+    return { top: 0 }
+  }
 })
 
 router.beforeEach((to, from, next) => {

@@ -11,7 +11,7 @@
     </section>
 
     <footer class="action-footer">
-      <BaseButton variant="finko-start-level" @click="startLesson" full-width>
+      <BaseButton variant="primary" @click="startLesson" full-width>
         Comenzar
       </BaseButton>
     </footer>

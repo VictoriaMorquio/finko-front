@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { investService } from '@/api/investService'
+import investService from '@/api/investService'
 
 export const useInvestStore = defineStore('invest', {
   state: () => ({

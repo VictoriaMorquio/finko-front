@@ -2,7 +2,7 @@
   <div class="forgot-password-page">
     <div class="container">
       <div class="logo-container">
-        <img src="/images/finko-logo.png" alt="Logo de Finko" class="logo-image">
+        <img src="/finko-logo.png" alt="Logo de Finko" class="logo-image">
       </div>
 
       <h1 class="title">Restablece tu contraseña</h1>
@@ -28,7 +28,7 @@
         />
         <p v-if="passwordMismatch" class="error-message" style="text-align:left;">Las contraseñas no coinciden.</p>
 
-        <BaseButton type="submit" :disabled="authStore.loading || passwordMismatch" variant="finko-signup" full-width style="margin-top: 10px;">
+        <BaseButton type="submit" :disabled="authStore.loading || passwordMismatch" variant="primary" full-width style="margin-top: 10px;">
           {{ authStore.loading ? 'Confirmando...' : 'Confirmar' }}
         </BaseButton>
       </form>

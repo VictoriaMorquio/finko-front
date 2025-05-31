@@ -3,7 +3,7 @@
     <button v-if="showBack || showClose" class="action-btn-header" @click="handleLeftAction" :aria-label="leftActionLabel">
       {{ showBack ? '←' : (showClose ? '×' : '') }}
     </button>
-    <img v-if="showLogo" src="/images/finko-logo.png" alt="Finko Logo" class="header-logo-inline" />
+    <img v-if="showLogo" src="/finko-logo.png" alt="Finko Logo" class="header-logo-inline" />
     <h1 v-if="title" class="header-title" :style="{ left: (showBack || showClose) && !showLogo ? '-20px' : '0' }">
       {{ title }}
     </h1>

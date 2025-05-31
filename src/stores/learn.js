@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { learnService } from '@/api/learnService'
+import learnService from '@/api/learnService'
 
 export const useLearnStore = defineStore('learn', {
   state: () => ({

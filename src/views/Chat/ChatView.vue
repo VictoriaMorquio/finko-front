@@ -20,17 +20,17 @@
     </main>
 
     <footer class="chat-input-container">
-      <input
-        type="text"
+      <BaseInput
         v-model="newMessage"
         placeholder="Resuelve tu duda"
         @keypress.enter="sendMessage"
         :disabled="chatStore.isLoadingResponse"
-      >
+        class="chat-input"
+      />
       <BaseButton
         @click="sendMessage"
         :disabled="chatStore.isLoadingResponse || !newMessage.trim()"
-        variant="finko-signup"
+        variant="primary"
         style="margin-left: 10px; padding: 12px 18px; border-radius: 25px; min-width: auto;"
         :full-width="false"
       >
@@ -48,6 +48,7 @@ import { useAuthStore } from '@/stores/auth';
 import PageHeader from '@/components/common/PageHeader.vue';
 import ChatMessage from '@/components/chat/ChatMessage.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
+import BaseInput from '@/components/common/BaseInput.vue';
 
 const chatStore = useChatStore();
 const authStore = useAuthStore();
@@ -128,22 +129,34 @@ const scrollToBottom = () => {
     margin-bottom: 0; /* No necesita compensación */
 }
 
-
-.chat-input-container input[type="text"] {
+/* Personalización del BaseInput para el chat */
+.chat-input-container :deep(.input-group) {
   flex-grow: 1;
-  padding: 14px 18px;
-  border: none;
-  border-radius: 25px;
-  background-color: #F5F3F7;
-  font-size: 15px;
-  color: #333333;
-  outline: none;
+  margin-bottom: 0;
 }
-.chat-input-container input::placeholder {
-  color: #A098A7;
+
+.chat-input-container :deep(.base-input) {
+  padding: 14px 18px !important;
+  border: none !important;
+  border-radius: 25px !important;
+  background-color: #F5F3F7 !important;
+  font-size: 15px !important;
+  color: #333333 !important;
+  outline: none !important;
+}
+
+.chat-input-container :deep(.base-input::placeholder) {
+  color: #A098A7 !important;
+}
+
+.chat-input-container :deep(.input-wrapper) {
+  border: none !important;
 }
 
 @media (max-width: 360px) {
-  .chat-input-container input[type="text"] { font-size: 14px; padding: 12px 15px; }
+  .chat-input-container :deep(.base-input) { 
+    font-size: 14px !important; 
+    padding: 12px 15px !important; 
+  }
 }
 </style> 

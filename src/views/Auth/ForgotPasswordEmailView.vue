@@ -2,7 +2,7 @@
   <div class="forgot-password-page">
     <div class="container">
       <div class="logo-container">
-        <img src="/images/finko-logo.png" alt="Logo de Finko" class="logo-image">
+        <img src="/finko-logo.png" alt="Logo de Finko" class="logo-image">
       </div>
 
       <h1 class="title">Restablece tu contraseña</h1>
@@ -17,7 +17,7 @@
           class="reset-password-input-style"
           required
         />
-        <BaseButton type="submit" :disabled="authStore.loading" variant="finko-signup" full-width style="margin-top: 10px;">
+        <BaseButton type="submit" :disabled="authStore.loading" variant="primary" full-width style="margin-top: 10px;">
           {{ authStore.loading ? 'Enviando...' : 'Enviar enlace' }}
         </BaseButton>
       </form>

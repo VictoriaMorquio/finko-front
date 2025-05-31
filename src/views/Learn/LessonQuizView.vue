@@ -49,7 +49,7 @@
 
     <footer class="lesson-footer">
       <BaseButton
-        variant="finko-check-answer"
+        variant="primary"
         @click="checkAnswer"
         :disabled="!selectedAnswer && !isAnswered"
         full-width

@@ -44,7 +44,7 @@
 
 
     <footer class="save-button-container">
-      <BaseButton type="submit" form="editProfileForm" :disabled="profileStore.isLoading" variant="finko-save-profile">
+      <BaseButton type="submit" form="editProfileForm" :disabled="profileStore.isLoading" variant="primary">
         {{ profileStore.isLoading ? 'Guardando...' : 'Guardar' }}
       </BaseButton>
     </footer>

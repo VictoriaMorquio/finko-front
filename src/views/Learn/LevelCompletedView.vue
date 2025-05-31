@@ -22,7 +22,7 @@
     </main>
 
     <footer class="completion-footer">
-      <BaseButton variant="finko-continue-lesson" @click="continueLearning" full-width>
+      <BaseButton variant="primary" @click="continueLearning" full-width>
         Continuar
       </BaseButton>
     </footer>

@@ -38,7 +38,7 @@
         </section>
 
         <div class="edit-profile-button-container">
-            <BaseButton variant="finko-save-profile" @click="navigateToEditProfile"> <!-- Reutiliza el estilo del botón de guardar -->
+            <BaseButton variant="primary" @click="navigateToEditProfile">
                 Editar Perfil
             </BaseButton>
         </div>

@@ -4,7 +4,7 @@
     <div class="content">
       <h1>404</h1>
       <p>Lo sentimos, la página que buscas no existe.</p>
-      <BaseButton @click="$router.push({ name: 'LearnDashboard' })" variant="finko-login">
+      <BaseButton @click="$router.push({ name: 'LearnDashboard' })" variant="primary">
         Volver al Inicio
       </BaseButton>
     </div>

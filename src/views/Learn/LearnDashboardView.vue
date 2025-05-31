@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-page">
     <header class="dashboard-header">
-      <img src="/images/finko-logo.png" alt="Finko Logo" class="logo">
+      <img src="/finko-logo.png" alt="Finko Logo" class="logo">
     </header>
 
     <section class="progress-section" v-if="!learnStore.loading">

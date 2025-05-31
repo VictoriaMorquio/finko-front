@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { profileService } from '@/api/profileService'
+import profileService from '@/api/profileService'
 import { useAuthStore } from './auth'
 
 export const useProfileStore = defineStore('profile', {

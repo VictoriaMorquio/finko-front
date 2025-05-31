@@ -2,7 +2,7 @@
   <div class="signup-page-container">
     <div class="signup-container">
       <header>
-        <img src="/images/finko-logo.png" alt="Finko Logo" class="logo">
+        <img src="/finko-logo.png" alt="Finko Logo" class="logo">
         <h1>Crea tu cuenta</h1>
       </header>
 
@@ -52,7 +52,7 @@
         />
         <p v-if="passwordMismatch" class="error-message">Las contraseñas no coinciden.</p>
 
-        <BaseButton type="submit" :disabled="authStore.loading || passwordMismatch" variant="finko-signup" full-width style="margin-top: 25px;">
+        <BaseButton type="submit" :disabled="authStore.loading || passwordMismatch" variant="primary" full-width style="margin-top: 25px;">
           {{ authStore.loading ? 'Registrando...' : 'Regístrate' }}
         </BaseButton>
         <p v-if="authStore.error" class="error-message" style="text-align: center; margin-top: 10px;">{{ authStore.error }}</p>

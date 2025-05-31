@@ -42,7 +42,7 @@
      <div v-else-if="investStore.loading" class="loading-message">Cargando datos...</div>
 
     <footer class="action-button-container">
-      <BaseButton type="submit" form="buyStockForm" :disabled="investStore.loading || !form.amount || parseFloat(form.amount) <= 0" variant="finko-confirm-buy-sell">
+      <BaseButton type="submit" form="buyStockForm" :disabled="investStore.loading || !form.amount || parseFloat(form.amount) <= 0" variant="primary">
         {{ investStore.loading ? 'Comprando...' : 'Comprar' }}
       </BaseButton>
     </footer>

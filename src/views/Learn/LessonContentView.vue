@@ -11,7 +11,7 @@
     </main>
 
     <footer class="lesson-action-footer">
-      <BaseButton variant="finko-continue-lesson" @click="goToNextStep" full-width>
+      <BaseButton variant="primary" @click="goToNextStep" full-width>
         {{ lessonStep.isLastStep ? 'Finalizar Nivel' : 'Continuar' }}
       </BaseButton>
     </footer>
