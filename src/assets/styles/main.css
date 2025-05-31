@@ -1,0 +1,142 @@
+/* Reset básico y configuración general */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: #FFFFFF;
+  color: #212121;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clases de utilidad */
+.text-center {
+  text-align: center;
+}
+
+.container-padding {
+  padding: 20px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #111111;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111111;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+/* Estilos para formularios básicos */
+.form-group {
+  margin-bottom: 18px;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 8px;
+}
+
+.error-message {
+  color: #D32F2F;
+  font-size: 14px;
+  margin-top: 5px;
+  text-align: left;
+}
+
+.success-message {
+  color: #4CAF50;
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Fondos específicos */
+.bg-settings-page {
+  background-color: #F8F9FA;
+}
+
+/* Scroll horizontal */
+.horizontal-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 15px;
+  padding-bottom: 10px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cabeceras de página */
+.page-header-generic {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #F0F0F0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.page-header-generic .action-btn-header {
+  font-size: 28px;
+  color: #333333;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  margin-right: 10px;
+}
+.page-header-generic .action-btn-header:hover {
+  color: #000000;
+}
+
+.page-header-generic .header-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111111;
+  text-align: center;
+  flex-grow: 1;
+  position: relative;
+}
+
+.page-header-generic .right-action-btn-header {
+  font-size: 24px;
+  color: #333333;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  margin-left: 10px;
+}
+.page-header-generic .right-action-btn-header svg {
+  display: block;
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+} 
