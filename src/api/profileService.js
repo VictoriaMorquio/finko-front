@@ -181,7 +181,7 @@ const mockProfile = {
     }
   },
 
-  async changePassword(currentPassword, newPassword) {
+  async changePassword(currentPassword, newPassword, confirmNewPassword) {
     await delay(1000)
     
     if (currentPassword !== '123456') {
@@ -194,6 +194,10 @@ const mockProfile = {
 
     if (newPassword.length > 128) {
       throw new Error('La nueva contraseña debe tener entre 8 y 128 caracteres')
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      throw new Error('Las contraseñas no coinciden')
     }
 
     return { success: true, message: 'Contraseña actualizada correctamente' }
@@ -240,12 +244,27 @@ const mockProfile = {
     }
   },
 
-  async deleteAccount() {
+  async deleteAccount(deleteData) {
     await delay(1000)
+    
+    // Simular validación de contraseña
+    if (!deleteData.currentPassword) {
+      throw new Error('Se requiere la contraseña actual')
+    }
+    
+    // Simular validación del texto de confirmación
+    if (deleteData.confirmDelete !== 'DELETE_MY_ACCOUNT') {
+      throw new Error('El texto de confirmación debe ser exactamente: DELETE_MY_ACCOUNT')
+    }
+    
+    // Simular validación de contraseña incorrecta ocasionalmente (para testing)
+    if (deleteData.currentPassword === 'wrongpassword') {
+      throw new Error('Contraseña incorrecta')
+    }
     
     return { 
       success: true, 
-      message: 'Cuenta eliminada correctamente. Lamentamos verte partir.' 
+      message: 'Cuenta eliminada permanentemente. Lamentamos verte partir.' 
     }
   }
 }
@@ -265,12 +284,18 @@ const realProfile = {
     }
   },
 
-  async deleteAccount() {
-    await httpClient.delete('/auth/me/account');
+  async deleteAccount(deleteData) {
+    const response = await httpClient.delete('/auth/me/account', {
+      currentPassword: deleteData.currentPassword,
+      confirmDelete: deleteData.confirmDelete
+    });
+    
+    // Limpiar token después de eliminación exitosa
     localStorage.removeItem('finko_auth_token');
+    
     return { 
       success: true, 
-      message: 'Cuenta eliminada correctamente. Lamentamos verte partir.' 
+      message: response.message || 'Cuenta eliminada correctamente. Lamentamos verte partir.' 
     };
   },
 
@@ -291,10 +316,11 @@ const realProfile = {
     return await httpClient.put('/auth/me', profileData);
   },
 
-  async changePassword(currentPassword, newPassword) {
+  async changePassword(currentPassword, newPassword, confirmNewPassword) {
     return await httpClient.put('/auth/me/password', {
       currentPassword,
-      newPassword
+      newPassword,
+      confirmNewPassword
     });
   },
 

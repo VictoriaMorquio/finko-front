@@ -44,7 +44,12 @@ class HttpClient {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Error del servidor' }))
-        throw new Error(errorData.message || `Error ${response.status}`)
+        
+        // Incluir el código de status en el mensaje de error para mejor manejo
+        const errorMessage = errorData.message || `Error ${response.status}`
+        const errorWithStatus = `${errorMessage} (${response.status})`
+        
+        throw new Error(errorWithStatus)
       }
 
       // Si no hay contenido, devolver respuesta vacía
@@ -52,7 +57,22 @@ class HttpClient {
         return null
       }
 
-      return await response.json()
+      const responseData = await response.json()
+      
+      // Si hay token regenerado en headers, incluirlo en la respuesta
+      const tokenRegenerated = response.headers.get('X-Token-Regenerated')
+      if (tokenRegenerated === 'true') {
+        const newToken = response.headers.get('Authorization')?.replace('Bearer ', '') || 
+                        response.headers.get('X-New-Token') ||
+                        response.headers.get('Access-Token')
+        
+        if (newToken) {
+          responseData._newToken = newToken
+          responseData._tokenRegenerated = true
+        }
+      }
+      
+      return responseData
     } catch (error) {
       console.error('API Error:', error)
       throw error
@@ -80,8 +100,15 @@ class HttpClient {
     })
   }
 
-  async delete(endpoint, options = {}) {
-    return this.request(endpoint, { ...options, method: 'DELETE' })
+  async delete(endpoint, data = null, options = {}) {
+    const config = { ...options, method: 'DELETE' }
+    
+    // Si se proporciona data, incluirla en el cuerpo
+    if (data !== null) {
+      config.body = JSON.stringify(data)
+    }
+    
+    return this.request(endpoint, config)
   }
 
   // Para subida de archivos

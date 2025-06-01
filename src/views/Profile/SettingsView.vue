@@ -31,17 +31,31 @@
        <p v-if="message" class="success-message" style="padding: 0 20px;">{{ message }}</p>
     </main>
 
+    <!-- Modal de eliminación de cuenta -->
+    <DeleteAccountModal
+      :is-visible="showDeleteModal"
+      :is-loading="profileStore.isLoading"
+      :error="modalError"
+      @close="closeDeleteModal"
+      @confirm="confirmDeleteAccount"
+    />
+
     <!-- BottomNavigationBar es global y se muestra aquí porque está en las rutas con Nav -->
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useProfileStore } from '@/stores/profile';
 import PageHeader from '@/components/common/PageHeader.vue';
+import DeleteAccountModal from '@/components/common/DeleteAccountModal.vue';
 
+const router = useRouter();
 const profileStore = useProfileStore();
 const message = ref('');
+const showDeleteModal = ref(false);
+const modalError = ref('');
 
 const handleLogout = async () => {
   if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
@@ -56,33 +70,34 @@ const handleLogout = async () => {
   }
 };
 
-const handleDeleteAccount = async () => {
-  if (confirm("¿Estás SEGURO de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.")) {
-    if(confirm("Confirmación final: ¿Realmente deseas eliminar tu cuenta de forma permanente?")) {
-      profileStore.error = null;
-      message.value = '';
-      try {
-        await profileStore.deleteAccount();
-         // La redirección a Login la maneja el authStore
-      } catch(e) {
-        // El error se muestra
-      }
-    }
+const handleDeleteAccount = () => {
+  // Limpiar errores previos y mostrar modal
+  profileStore.error = null;
+  modalError.value = '';
+  message.value = '';
+  showDeleteModal.value = true;
+};
+
+const closeDeleteModal = () => {
+  showDeleteModal.value = false;
+  modalError.value = '';
+};
+
+const confirmDeleteAccount = async (deleteData) => {
+  modalError.value = '';
+  
+  try {
+    await profileStore.deleteAccount(deleteData);
+    // Si llega aquí, la eliminación fue exitosa
+    // La redirección a Login la maneja authStore.logout()
+  } catch (error) {
+    console.error('Error al eliminar cuenta:', error);
+    modalError.value = error.message || 'Error al eliminar la cuenta';
   }
 };
 
-const contactSupport = async () => {
-    profileStore.error = null;
-    message.value = '';
-    // Aquí podrías abrir un modal para escribir el mensaje o redirigir a un formulario
-    // Por ahora, una simulación simple:
-    try {
-        const response = await profileStore.contactSupport({ subject: "Ayuda General", body: "Necesito ayuda con..." });
-        message.value = response.message || "Redirigiendo a la página de contacto (simulación).";
-        // alert("Redirigiendo a la página de contacto (simulación).");
-    } catch (e) {
-        // error ya manejado por el store
-    }
+const contactSupport = () => {
+  router.push({ name: 'Contact' });
 };
 </script>
 
