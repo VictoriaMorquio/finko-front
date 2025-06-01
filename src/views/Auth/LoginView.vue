@@ -103,8 +103,8 @@ const validateForm = () => {
   if (!password.value) {
     errors.password = 'La contraseña es requerida'
     isValid = false
-  } else if (password.value.length < 6) {
-    errors.password = 'La contraseña debe tener al menos 6 caracteres'
+  } else if (password.value.length < 8) {
+    errors.password = 'La contraseña debe tener al menos 8 caracteres'
     isValid = false
   }
 

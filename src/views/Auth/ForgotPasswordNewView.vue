@@ -17,6 +17,7 @@
           class="reset-password-input-style"
           required
         />
+        <p v-if="passwordError" class="error-message" style="text-align:left;">{{ passwordError }}</p>
         <BaseInput
           id="confirm_password"
           v-model="form.confirmPassword"
@@ -28,7 +29,13 @@
         />
         <p v-if="passwordMismatch" class="error-message" style="text-align:left;">Las contraseñas no coinciden.</p>
 
-        <BaseButton type="submit" :disabled="authStore.loading || passwordMismatch" variant="primary" full-width style="margin-top: 10px;">
+        <BaseButton 
+          type="submit" 
+          :disabled="authStore.loading || passwordMismatch || !isFormValid" 
+          variant="primary" 
+          full-width 
+          style="margin-top: 10px;"
+        >
           {{ authStore.loading ? 'Confirmando...' : 'Confirmar' }}
         </BaseButton>
       </form>
@@ -54,12 +61,30 @@ const form = ref({
 const message = ref('');
 const token = route.params.token; // Obtener token de la URL
 
+const passwordError = computed(() => {
+  if (!form.value.newPassword) return null;
+  if (form.value.newPassword.length < 8) {
+    return 'La contraseña debe tener entre 8 y 128 caracteres';
+  }
+  if (form.value.newPassword.length > 128) {
+    return 'La contraseña debe tener entre 8 y 128 caracteres';
+  }
+  return null;
+});
+
 const passwordMismatch = computed(() => {
   return form.value.newPassword && form.value.confirmPassword && form.value.newPassword !== form.value.confirmPassword;
 });
 
+const isFormValid = computed(() => {
+  return form.value.newPassword && 
+         form.value.confirmPassword && 
+         !passwordError.value && 
+         !passwordMismatch.value;
+});
+
 const handleConfirmNewPassword = async () => {
-  if (passwordMismatch.value) return;
+  if (!isFormValid.value) return;
   message.value = '';
   authStore.error = null;
   try {

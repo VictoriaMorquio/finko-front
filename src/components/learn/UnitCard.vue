@@ -40,9 +40,9 @@ defineEmits(['selected']);
 }
 
 .unit-card .unit-image {
-  max-width: 80%;
-  max-height: 80%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .unit-card .unit-title {

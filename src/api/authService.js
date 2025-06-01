@@ -1,9 +1,14 @@
 import { users } from './_mockData'; // Usar los usuarios del mockData centralizado
+import httpClient from './httpClient';
+import { API_CONFIG } from '../config/api.js';
+
 const MOCK_DELAY = 500;
+const USE_MOCK_DATA = API_CONFIG.USE_MOCK_DATA;
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
-export default {
+// Funciones mock (mantener como estaban)
+const mockAuth = {
   async login(credentials) {
     await delay(MOCK_DELAY)
     
@@ -88,8 +93,12 @@ export default {
       throw new Error('Token de recuperación inválido o expirado')
     }
 
-    if (!newPassword || newPassword.length < 6) {
-      throw new Error('La contraseña debe tener al menos 6 caracteres')
+    if (!newPassword || newPassword.length < 8) {
+      throw new Error('La contraseña debe tener entre 8 y 128 caracteres')
+    }
+
+    if (newPassword.length > 128) {
+      throw new Error('La contraseña debe tener entre 8 y 128 caracteres')
     }
 
     // Simular actualización de contraseña
@@ -107,4 +116,57 @@ export default {
     
     return userWithoutPassword
   }
-} 
+}
+
+// Funciones para API real
+const realAuth = {
+  async login(credentials) {
+    const response = await httpClient.post('/auth/login', credentials);
+    
+    // Guardar token en localStorage
+    if (response.token) {
+      localStorage.setItem('finko_auth_token', response.token);
+    }
+    
+    return response;
+  },
+
+  async signup(userData) {
+    const response = await httpClient.post('/auth/signup', userData);
+    
+    if (response.token) {
+      localStorage.setItem('finko_auth_token', response.token);
+    }
+    
+    return response;
+  },
+
+  async requestPasswordReset(emailOrUsername) {
+    return await httpClient.post('/auth/password-reset', { 
+      emailOrUsername 
+    });
+  },
+
+  async confirmNewPassword(token, newPassword) {
+    return await httpClient.post('/auth/password-reset/confirm', {
+      token,
+      newPassword
+    });
+  },
+
+  async getCurrentUser() {
+    return await httpClient.get('/auth/me');
+  },
+
+  async logout() {
+    try {
+      await httpClient.post('/auth/logout');
+    } finally {
+      // Limpiar token independientemente del resultado
+      localStorage.removeItem('finko_auth_token');
+    }
+  }
+}
+
+// Exportar el servicio apropiado según la configuración
+export default USE_MOCK_DATA ? mockAuth : realAuth; 

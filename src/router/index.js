@@ -27,6 +27,7 @@ import ChatView from '@/views/Chat/ChatView.vue'
 // Profile Views
 import ProfileView from '@/views/Profile/ProfileView.vue'
 import EditProfileView from '@/views/Profile/EditProfileView.vue'
+import ChangePasswordView from '@/views/Profile/ChangePasswordView.vue'
 import SettingsView from '@/views/Profile/SettingsView.vue'
 
 // Other
@@ -136,6 +137,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/profile/change-password',
+    name: 'ChangePassword',
+    component: ChangePasswordView,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/settings',
     name: 'Settings',
     component: SettingsView,
@@ -152,11 +159,9 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    // Si hay una posición guardada (navegación con botón atrás/adelante), usarla
     if (savedPosition) {
       return savedPosition
     }
-    // Si no, siempre ir al top de la página
     return { top: 0 }
   }
 })

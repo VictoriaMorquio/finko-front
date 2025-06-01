@@ -38,7 +38,13 @@
         </section>
 
         <div class="edit-profile-button-container">
-            <BaseButton variant="primary" @click="navigateToEditProfile">
+            <BaseButton 
+                variant="primary" 
+                size="large"
+                full-width
+                class="btn-edit-profile"
+                @click="navigateToEditProfile"
+            >
                 Editar Perfil
             </BaseButton>
         </div>
@@ -168,6 +174,29 @@ Esto se manejará en el mockData para los achievements.
   padding: 10px 20px 30px; /* No considerar el espacio para nav bar aquí, App.vue lo hace */
 }
 /* BaseButton maneja el estilo .btn-edit-profile (usar variant finko-save-profile) */
+
+/* Personalización del botón de editar perfil para que coincida con el botón de login */
+.edit-profile-button-container :deep(.btn-edit-profile) {
+  width: 100% !important;
+  padding: 15px !important;
+  border: none !important;
+  border-radius: 12px !important; /* Bordes más redondeados */
+  font-size: 18px !important;
+  font-weight: bold !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #FF007F !important; /* Color magenta/fucsia igual al botón de login */
+  color: white !important;
+}
+
+.edit-profile-button-container :deep(.btn-edit-profile:hover:not(:disabled)) {
+  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+}
+
+.edit-profile-button-container :deep(.btn-edit-profile:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .loading-spinner, .error-message-fullpage {
     text-align: center;

@@ -39,12 +39,33 @@
         <!-- Podría añadirse cambio de contraseña aquí o en una sección separada -->
         <p v-if="profileStore.error" class="error-message">{{ profileStore.error }}</p>
       </form>
+      
+      <!-- Botón para cambiar contraseña -->
+      <div class="change-password-section">
+        <BaseButton 
+          variant="outline"
+          size="medium"
+          full-width
+          class="btn-change-password-link"
+          @click="navigateToChangePassword"
+        >
+          🔒 Cambiar Contraseña
+        </BaseButton>
+      </div>
     </main>
     <div v-else class="loading-spinner">Cargando...</div>
 
 
     <footer class="save-button-container">
-      <BaseButton type="submit" form="editProfileForm" :disabled="profileStore.isLoading" variant="primary">
+      <BaseButton 
+        type="submit" 
+        form="editProfileForm" 
+        :disabled="profileStore.isLoading" 
+        variant="primary"
+        size="large"
+        full-width
+        class="btn-save-profile"
+      >
         {{ profileStore.isLoading ? 'Guardando...' : 'Guardar' }}
       </BaseButton>
     </footer>
@@ -91,6 +112,10 @@ const handleSaveProfile = async () => {
     // El error se maneja en el store y se muestra
   }
 };
+
+const navigateToChangePassword = () => {
+  router.push({ name: 'ChangePassword' });
+};
 </script>
 
 <style scoped>
@@ -98,15 +123,24 @@ const handleSaveProfile = async () => {
 .edit-profile-page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
   background-color: #FFFFFF;
 }
 /* PageHeader maneja la cabecera */
 
 .profile-form-section {
-  padding: 30px 20px;
+  padding: 30px 20px 20px; /* Reducido padding bottom */
   text-align: center;
-  flex-grow: 1;
+}
+
+.profile-form-section form {
+  text-align: left; /* Alinear el formulario a la izquierda */
+  margin-top: 20px; /* Espacio entre el username y el formulario */
+}
+
+/* Mantener centrados solo la foto y el username */
+.profile-picture-container-edit,
+.username-display {
+  text-align: center;
 }
 
 .profile-picture-container-edit {
@@ -135,19 +169,55 @@ const handleSaveProfile = async () => {
   margin-bottom: 30px;
 }
 
+.change-password-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #F0F0F0;
+}
+
+/* Estilo para el botón de cambiar contraseña */
+.change-password-section :deep(.btn-change-password-link) {
+  border: 2px solid #FF007F !important;
+  color: #FF007F !important;
+  background-color: transparent !important;
+  font-weight: 600 !important;
+}
+
+.change-password-section :deep(.btn-change-password-link:hover:not(:disabled)) {
+  background-color: #FF007F !important;
+  color: white !important;
+}
+
 /* BaseInput maneja .form-group, label, input (color de fondo por defecto es el de signup, que es el que usa esta vista) */
 
 .save-button-container {
-  padding: 20px 20px 30px;
+  padding: 20px;
   background-color: #FFFFFF;
-  border-top: 1px solid #F0F0F0;
-  position: sticky; /* Se queda abajo */
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 90;
 }
-/* BaseButton maneja .btn-save-profile (usar variant finko-save-profile) */
+
+/* Personalización del botón de guardar para que coincida con el botón de login */
+.save-button-container :deep(.btn-save-profile) {
+  width: 100% !important;
+  padding: 15px !important;
+  border: none !important;
+  border-radius: 12px !important; /* Bordes más redondeados */
+  font-size: 18px !important;
+  font-weight: bold !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #FF007F !important; /* Color magenta/fucsia igual al botón de login */
+  color: white !important;
+}
+
+.save-button-container :deep(.btn-save-profile:hover:not(:disabled)) {
+  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+}
+
+.save-button-container :deep(.btn-save-profile:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .loading-spinner {
     text-align: center;
     padding: 50px 20px;

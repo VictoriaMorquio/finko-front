@@ -1,5 +1,9 @@
 import { users } from './_mockData'; // Compartir los usuarios con authService
+import httpClient from './httpClient';
+import { API_CONFIG } from '../config/api.js';
+
 const MOCK_DELAY = 300;
+const USE_MOCK_DATA = API_CONFIG.USE_MOCK_DATA;
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -90,9 +94,8 @@ const mockSettings = {
   }
 }
 
-export default {
-  // getProfileData(userId) ahora se maneja a través de authStore.currentUser
-
+// Servicios mock
+const mockProfile = {
   updateUserProfile: (userId, profileDetails) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -110,8 +113,7 @@ export default {
             ...users[userIndex],
             username: profileDetails.username || users[userIndex].username,
             email: profileDetails.email || users[userIndex].email,
-            fullname: profileDetails.name || users[userIndex].fullname, // 'name' from form
-            // profilePic si se actualiza
+            fullname: profileDetails.name || users[userIndex].fullname,
           };
           const { password, ...userWithoutPassword } = users[userIndex];
           resolve(userWithoutPassword);
@@ -121,6 +123,7 @@ export default {
       }, MOCK_DELAY);
     });
   },
+
   logout: () => {
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -129,12 +132,13 @@ export default {
         }, MOCK_DELAY / 2);
     });
   },
+
   deleteAccount: (userId) => {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
             const userIndex = users.findIndex(u => u.id === userId);
             if (userIndex !== -1) {
-                users.splice(userIndex, 1); // Eliminar usuario del mock
+                users.splice(userIndex, 1);
                 console.log(`Mock: User ${userId} account deleted.`);
                 resolve({ success: true, message: "Cuenta eliminada correctamente." });
             } else {
@@ -143,6 +147,7 @@ export default {
         }, MOCK_DELAY);
     });
   },
+
   contactSupport: (messageData) => {
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -151,6 +156,7 @@ export default {
         }, MOCK_DELAY);
     });
   },
+
   async getProfile() {
     await delay(600)
     return mockUserProfile
@@ -159,7 +165,6 @@ export default {
   async updateProfile(profileData) {
     await delay(800)
     
-    // Simular validación
     if (profileData.email && !profileData.email.includes('@')) {
       throw new Error('Email inválido')
     }
@@ -168,7 +173,6 @@ export default {
       throw new Error('Teléfono inválido')
     }
 
-    // Simular actualización exitosa
     Object.assign(mockUserProfile, profileData)
     
     return {
@@ -180,16 +184,18 @@ export default {
   async changePassword(currentPassword, newPassword) {
     await delay(1000)
     
-    // Simular validación de contraseña actual
     if (currentPassword !== '123456') {
       throw new Error('Contraseña actual incorrecta')
     }
     
-    if (newPassword.length < 6) {
-      throw new Error('La nueva contraseña debe tener al menos 6 caracteres')
+    if (newPassword.length < 8) {
+      throw new Error('La nueva contraseña debe tener entre 8 y 128 caracteres')
     }
 
-    // Simular cambio exitoso
+    if (newPassword.length > 128) {
+      throw new Error('La nueva contraseña debe tener entre 8 y 128 caracteres')
+    }
+
     return { success: true, message: 'Contraseña actualizada correctamente' }
   },
 
@@ -206,7 +212,6 @@ export default {
   async updateSettings(newSettings) {
     await delay(500)
     
-    // Simular actualización de configuración
     Object.assign(mockSettings, newSettings)
     
     return {
@@ -218,16 +223,14 @@ export default {
   async uploadAvatar(file) {
     await delay(1500)
     
-    // Simular validación de archivo
     if (!file || !file.type.startsWith('image/')) {
       throw new Error('Debe ser un archivo de imagen válido')
     }
     
-    if (file.size > 5 * 1024 * 1024) { // 5MB
+    if (file.size > 5 * 1024 * 1024) {
       throw new Error('La imagen debe ser menor a 5MB')
     }
 
-    // Simular subida exitosa
     const newAvatarUrl = '/images/profile-pic.png'
     mockUserProfile.avatar = newAvatarUrl
     
@@ -240,10 +243,91 @@ export default {
   async deleteAccount() {
     await delay(1000)
     
-    // En una implementación real, esto eliminaría la cuenta
     return { 
       success: true, 
       message: 'Cuenta eliminada correctamente. Lamentamos verte partir.' 
     }
   }
-} 
+}
+
+// Servicios reales para API
+const realProfile = {
+  async updateUserProfile(userId, profileDetails) {
+    return await httpClient.put('/auth/me', profileDetails);
+  },
+
+  async logout() {
+    try {
+      await httpClient.post('/auth/logout');
+      return { success: true };
+    } finally {
+      localStorage.removeItem('finko_auth_token');
+    }
+  },
+
+  async deleteAccount() {
+    await httpClient.delete('/auth/me/account');
+    localStorage.removeItem('finko_auth_token');
+    return { 
+      success: true, 
+      message: 'Cuenta eliminada correctamente. Lamentamos verte partir.' 
+    };
+  },
+
+  async contactSupport(messageData) {
+    const response = await httpClient.post('/support/contact', messageData);
+    return { 
+      success: true, 
+      message: response.message || 'Tu mensaje ha sido enviado. Nos pondremos en contacto pronto.' 
+    };
+  },
+
+  async getProfile() {
+    // El perfil se obtiene a través de /auth/me
+    return await httpClient.get('/auth/me');
+  },
+
+  async updateProfile(profileData) {
+    return await httpClient.put('/auth/me', profileData);
+  },
+
+  async changePassword(currentPassword, newPassword) {
+    return await httpClient.put('/auth/me/password', {
+      currentPassword,
+      newPassword
+    });
+  },
+
+  async getAchievements() {
+    // Mantener mock por ahora ya que no está implementado en backend
+    await delay(400);
+    return mockAchievements;
+  },
+
+  async getSettings() {
+    // Mantener mock por ahora ya que no está implementado en backend
+    await delay(300);
+    return mockSettings;
+  },
+
+  async updateSettings(newSettings) {
+    // Mantener mock por ahora ya que no está implementado en backend
+    await delay(500);
+    Object.assign(mockSettings, newSettings);
+    return { ...mockSettings, ...newSettings };
+  },
+
+  async uploadAvatar(file) {
+    const formData = new FormData();
+    formData.append('profilePic', file);
+    
+    const response = await httpClient.postFile('/auth/me/profile-pic', formData);
+    
+    return {
+      avatarUrl: response.profilePicUrl || response.avatarUrl,
+      message: response.message || 'Avatar actualizado correctamente'
+    };
+  }
+}
+
+export default USE_MOCK_DATA ? mockProfile : realProfile; 

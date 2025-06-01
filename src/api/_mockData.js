@@ -23,14 +23,15 @@ export let users = [ // 'export let' para permitir modificaciones desde los serv
   }
 ];
 
+
 // Para learnService
 export const mockUnits = [
-  { id: 'unit1', title: 'Unidad 1:<br>Fundamentos del Dinero', description: 'Conoce las bases del dinero y tus finanzas.', image: '/images/nivel1.png', bgColor: '#FBEAE3' },
-  { id: 'unit2', title: 'Unidad 2:<br>Introducción a la Inversión', description: 'Empieza a entender cómo hacer crecer tu dinero.', image: '/images/nivel1.png', bgColor: '#FDF0F3'},
-  { id: 'unit3', title: 'Unidad 3:<br>¿Dónde Puedo Invertir?', description: 'Descubre los tipos básicos de activos.', image: '/images/nivel1.png', bgColor: '#FBEAE3' },
-  { id: 'unit4', title: 'Unidad 4:<br>Primeros Pasos como Inversor', description: 'Aprende cómo comenzar a invertir.', image: '/images/nivel1.png', bgColor: '#F5F5F5' },
-  { id: 'unit5', title: 'Unidad 5:<br>Estrategias Avanzadas', description: 'Explora técnicas más sofisticadas.', image: '/images/nivel1.png', bgColor: '#FBEAE3' },
-  { id: 'unit6', title: 'Unidad 6:<br>Planificación Financiera', description: 'Crea un plan sólido para tu futuro.', image: '/images/nivel1.png', bgColor: '#FDF0F3' },
+  { id: 'unit1', title: 'Unidad 1:<br>Fundamentos del Dinero', description: 'Conoce las bases del dinero y tus finanzas.', image: '/images/unidad1.jpg', bgColor: '#FBEAE3' },
+  { id: 'unit2', title: 'Unidad 2:<br>Introducción a la Inversión', description: 'Empieza a entender cómo hacer crecer tu dinero.', image: '/images/unidad2.jpg', bgColor: '#FDF0F3'},
+  { id: 'unit3', title: 'Unidad 3:<br>¿Dónde Puedo Invertir?', description: 'Descubre los tipos básicos de activos.', image: '/images/unidad3.jpg', bgColor: '#FBEAE3' },
+  { id: 'unit4', title: 'Unidad 4:<br>Primeros Pasos como Inversor', description: 'Aprende cómo comenzar a invertir.', image: '/images/unidad4.jpg', bgColor: '#F5F5F5' },
+  { id: 'unit5', title: 'Unidad 5:<br>Estrategias Avanzadas', description: 'Explora técnicas más sofisticadas.', image: '/images/unidad5.jpg', bgColor: '#FBEAE3' },
+  { id: 'unit6', title: 'Unidad 6:<br>Planificación Financiera', description: 'Crea un plan sólido para tu futuro.', image: '/images/unidad6.jpg', bgColor: '#FDF0F3' },
 ];
 
 export const mockUnitSkills = [
@@ -38,12 +39,11 @@ export const mockUnitSkills = [
     unitId: 'unit1',
     title: 'Unidad 1: Habilidades', // Título principal de la pantalla de habilidades
     skills: [
-      { id: 'skill1-1', title: '¿Qué es el dinero?', image: '/images/paso1.png', progress: 100 },
-      { id: 'skill1-2', title: 'Ingresos y gastos', image: '/images/paso1.png', progress: 60 },
-      { id: 'skill1-3', title: 'Ahorro:<br>El primer paso', image: '/images/paso1.png', progress: 25 },
-      { id: 'skill1-4', title: 'Deuda:<br>Amiga o Enemiga', image: '/images/paso1.png', progress: 0 },
-      { id: 'skill1-5', title: 'Creando un presupuesto', image: '/images/paso1.png', progress: 0 },
-      { id: 'skill1-6', title: 'Metas Financieras', image: '/images/paso1.png', progress: 0 },
+      { id: 'skill1-1', title: '¿Qué es el dinero?', image: '/images/u1h1.jpg', progress: 100 },
+      { id: 'skill1-2', title: 'Ingresos y gastos', image: '/images/u1h2.jpg', progress: 60 },
+      { id: 'skill1-3', title: 'Ahorro:<br>El primer paso', image: '/images/u1h3.jpg', progress: 25 },
+      { id: 'skill1-4', title: 'Deuda:<br>Amiga o Enemiga', image: '/images/u1h4.jpg', progress: 0 },
+      { id: 'skill1-5', title: 'Metas Financieras', image: '/images/u1h5.jpg', progress: 0 },
     ]
   },
   // ... más habilidades para otras unidades

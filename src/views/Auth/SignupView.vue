@@ -41,6 +41,7 @@
           placeholder="****************"
           required
         />
+        <p v-if="passwordError" class="error-message">{{ passwordError }}</p>
         <BaseInput
           id="confirm-password"
           v-model="form.confirmPassword"
@@ -52,7 +53,13 @@
         />
         <p v-if="passwordMismatch" class="error-message">Las contraseñas no coinciden.</p>
 
-        <BaseButton type="submit" :disabled="authStore.loading || passwordMismatch" variant="primary" full-width style="margin-top: 25px;">
+        <BaseButton 
+          type="submit" 
+          :disabled="authStore.loading || passwordMismatch || !isFormValid" 
+          variant="primary" 
+          full-width 
+          style="margin-top: 25px;"
+        >
           {{ authStore.loading ? 'Registrando...' : 'Regístrate' }}
         </BaseButton>
         <p v-if="authStore.error" class="error-message" style="text-align: center; margin-top: 10px;">{{ authStore.error }}</p>
@@ -80,12 +87,33 @@ const form = ref({
   confirmPassword: '',
 });
 
+const passwordError = computed(() => {
+  if (!form.value.password) return null;
+  if (form.value.password.length < 8) {
+    return 'La contraseña debe tener entre 8 y 128 caracteres';
+  }
+  if (form.value.password.length > 128) {
+    return 'La contraseña debe tener entre 8 y 128 caracteres';
+  }
+  return null;
+});
+
 const passwordMismatch = computed(() => {
   return form.value.password && form.value.confirmPassword && form.value.password !== form.value.confirmPassword;
 });
 
+const isFormValid = computed(() => {
+  return form.value.email && 
+         form.value.username && 
+         form.value.fullname && 
+         form.value.password && 
+         form.value.confirmPassword && 
+         !passwordError.value && 
+         !passwordMismatch.value;
+});
+
 const handleSignup = async () => {
-  if (passwordMismatch.value) {
+  if (!isFormValid.value) {
     return;
   }
   await authStore.signup({
