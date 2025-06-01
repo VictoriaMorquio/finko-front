@@ -10,11 +10,18 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import BottomNavigationBar from '@/components/layout/BottomNavigationBar.vue';
 
 const route = useRoute();
+const authStore = useAuthStore();
+
+// Inicializar autenticación al cargar la app
+onMounted(async () => {
+  await authStore.initializeAuth();
+});
 
 const routesWithoutNav = [
   'Login', 'Signup', 'ForgotPasswordEmail', 'ForgotPasswordNew',
