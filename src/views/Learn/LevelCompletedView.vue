@@ -50,16 +50,23 @@ onMounted(() => {
 
 const completionData = computed(() => learnStore.currentLesson); // Reutilizamos currentLesson
 
-const continueLearning = () => {
+const continueLearning = async () => {
   // Actualizar monedas del usuario (UI Optimista)
   if (authStore.currentUser && completionData.value?.rewards?.coins) {
       const currentUserData = JSON.parse(JSON.stringify(authStore.currentUser));
       currentUserData.stats.coins += completionData.value.rewards.coins;
       currentUserData.stats.levelsCompleted +=1;
-      // Aquí se haría la llamada a la API para actualizar en backend
-      // profileService.updateUserStats(authStore.currentUser.id, { coins: currentUserData.stats.coins, levelsCompleted: currentUserData.stats.levelsCompleted });
-      authStore.user = currentUserData; // Actualizar el store local
+      
+      // Actualizar el store local inmediatamente (UI optimista)
+      authStore.user = currentUserData;
       localStorage.setItem('finkoUser', JSON.stringify(currentUserData));
+      
+      // También actualizar desde el servidor en background para mantener sincronización
+      try {
+        await authStore.refreshUserData();
+      } catch (err) {
+        console.warn('Could not sync data with server, using optimistic update:', err);
+      }
   }
 
   // Navegar al siguiente nivel/dashboard

@@ -72,6 +72,7 @@
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import profileService from '@/api/profileService';
 import PageHeader from '@/components/common/PageHeader.vue';
 import BaseInput from '@/components/common/BaseInput.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
@@ -146,12 +147,15 @@ const handleChangePassword = async () => {
   successMessage.value = '';
   
   try {
-    // Aquí iría la llamada al servicio para cambiar contraseña
-    // Por ahora simularemos una llamada exitosa
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simular API call
+    // Llamar al servicio real para cambiar contraseña
+    const response = await profileService.changePassword(
+      form.currentPassword,
+      form.newPassword,
+      form.confirmPassword
+    );
     
-    // Simulamos éxito
-    successMessage.value = 'Contraseña cambiada exitosamente';
+    // Mostrar mensaje de éxito
+    successMessage.value = response.message || 'Contraseña cambiada exitosamente';
     
     // Limpiar formulario
     form.currentPassword = '';
