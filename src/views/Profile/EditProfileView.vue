@@ -8,7 +8,7 @@
 
     <main class="profile-form-section" v-if="form">
       <div class="profile-picture-container-edit">
-        <img :src="authStore.currentUser?.profilePic || '/images/profile-pic-default.png'" alt="Foto de perfil" class="profile-picture-edit">
+        <img :src="getProfilePicUrl(authStore.currentUser?.profilePic)" alt="Foto de perfil" class="profile-picture-edit" @error="onImageError">
         <!-- Lógica para cambiar foto no implementada en este mock básico -->
       </div>
       <p class="username-display">@{{ authStore.currentUser?.username }}</p>
@@ -36,7 +36,7 @@
           name="name"
           required
         />
-        <!-- Podría añadirse cambio de contraseña aquí o en una sección separada -->
+        
         <p v-if="profileStore.error" class="error-message">{{ profileStore.error }}</p>
       </form>
       
@@ -55,45 +55,73 @@
     </main>
     <div v-else class="loading-spinner">Cargando...</div>
 
-
     <footer class="save-button-container">
       <BaseButton 
         type="submit" 
         form="editProfileForm" 
-        :disabled="profileStore.isLoading" 
+        :disabled="profileStore.isLoading || !hasChanges" 
         variant="primary"
         size="large"
         full-width
         class="btn-save-profile"
       >
-        {{ profileStore.isLoading ? 'Guardando...' : 'Guardar' }}
+        {{ profileStore.isLoading ? 'Guardando...' : 'Guardar cambios' }}
       </BaseButton>
     </footer>
+
+    <!-- Modal de confirmación de contraseña -->
+    <PasswordConfirmationModal
+      :is-visible="showPasswordModal"
+      :is-loading="profileStore.isLoading"
+      :error="modalError"
+      @close="closePasswordModal"
+      @confirm="confirmWithPassword"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useProfileStore } from '@/stores/profile';
+import { API_CONFIG } from '@/config/api';
 import PageHeader from '@/components/common/PageHeader.vue';
 import BaseInput from '@/components/common/BaseInput.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
+import PasswordConfirmationModal from '@/components/common/PasswordConfirmationModal.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
 const profileStore = useProfileStore();
 
 const form = ref(null);
+const originalData = ref(null); // Datos originales para comparar
+const showPasswordModal = ref(false);
+const modalError = ref('');
+const pendingFormData = ref(null);
+
+// Computed para verificar si hay cambios
+const hasChanges = computed(() => {
+  if (!form.value || !originalData.value) return false;
+  
+  return (
+    form.value.username !== originalData.value.username ||
+    form.value.email !== originalData.value.email ||
+    form.value.name !== originalData.value.name
+  );
+});
 
 onMounted(() => {
   if (authStore.currentUser) {
-    form.value = {
+    const userData = {
       username: authStore.currentUser.username,
       email: authStore.currentUser.email,
-      name: authStore.currentUser.fullname,
+      name: authStore.currentUser.fullname
     };
+    
+    form.value = { ...userData };
+    originalData.value = { ...userData }; // Guardar datos originales
   } else {
     // Si el usuario no está cargado, podría ser un error o necesitar carga
     // El router guard debería haber manejado esto.
@@ -103,18 +131,73 @@ onMounted(() => {
 
 const handleSaveProfile = async () => {
   if (!form.value) return;
-  profileStore.error = null; // Limpiar error anterior
+  
+  // Limpiar errores previos
+  profileStore.error = null;
+  modalError.value = '';
+  
+  // Guardar los datos del formulario y mostrar el modal
+  pendingFormData.value = { ...form.value };
+  showPasswordModal.value = true;
+};
+
+const closePasswordModal = () => {
+  showPasswordModal.value = false;
+  modalError.value = '';
+  pendingFormData.value = null;
+};
+
+const confirmWithPassword = async (password) => {
+  if (!pendingFormData.value || !password) return;
+  
+  modalError.value = '';
+  
   try {
-    await profileStore.updateProfile(form.value);
-    // alert('Perfil guardado (simulación desde vista)');
-    router.push({ name: 'Profile' }); // Volver al perfil
+    // Agregar la contraseña a los datos del formulario
+    const dataWithPassword = {
+      ...pendingFormData.value,
+      currentPassword: password
+    };
+    
+    await profileStore.updateProfile(dataWithPassword);
+    
+    // Cerrar modal y volver al perfil
+    closePasswordModal();
+    router.push({ name: 'Profile' });
   } catch (error) {
-    // El error se maneja en el store y se muestra
+    console.error('Error al actualizar perfil:', error);
+    
+    // Mostrar error en el modal
+    modalError.value = error.message || 'Error al actualizar el perfil';
   }
 };
 
 const navigateToChangePassword = () => {
   router.push({ name: 'ChangePassword' });
+};
+
+const getProfilePicUrl = (profilePic) => {
+  if (!profilePic) {
+    return '/images/profile-pic-default.png';
+  }
+  
+  // Si la URL ya es completa (empieza con http), la usamos tal como está
+  if (profilePic.startsWith('http://') || profilePic.startsWith('https://')) {
+    return profilePic;
+  }
+  
+  // Si es una ruta relativa, la construimos con la URL base del backend
+  if (profilePic.startsWith('/')) {
+    return `${API_CONFIG.BASE_URL}${profilePic}`;
+  }
+  
+  // Si no tiene formato reconocido, usar imagen por defecto
+  return '/images/profile-pic-default.png';
+};
+
+const onImageError = (event) => {
+  console.warn("Error al cargar imagen del backend, usando imagen por defecto");
+  event.target.src = '/images/profile-pic-default.png';
 };
 </script>
 
@@ -199,23 +282,25 @@ const navigateToChangePassword = () => {
 .save-button-container :deep(.btn-save-profile) {
   width: 100% !important;
   padding: 15px !important;
-  border: none !important;
-  border-radius: 12px !important; /* Bordes más redondeados */
-  font-size: 18px !important;
-  font-weight: bold !important;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  background-color: #FF007F !important; /* Color magenta/fucsia igual al botón de login */
+  background-color: #FF007F !important;
   color: white !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 25px !important;
+  font-size: 16px !important;
+  transition: all 0.3s ease !important;
 }
 
 .save-button-container :deep(.btn-save-profile:hover:not(:disabled)) {
-  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+  background-color: #E6006B !important;
+  transform: translateY(-1px) !important;
 }
 
 .save-button-container :deep(.btn-save-profile:disabled) {
-  opacity: 0.6;
-  cursor: not-allowed;
+  background-color: #CCCCCC !important;
+  color: #888888 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
 }
 
 .loading-spinner {
