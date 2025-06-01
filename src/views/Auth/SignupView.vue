@@ -59,6 +59,7 @@
           variant="primary" 
           full-width 
           style="margin-top: 25px;"
+          class="btn-signup"
         >
           {{ authStore.loading ? 'Registrando...' : 'Regístrate' }}
         </BaseButton>
@@ -121,6 +122,7 @@ const handleSignup = async () => {
     username: form.value.username,
     fullname: form.value.fullname,
     password: form.value.password,
+    confirmPassword: form.value.confirmPassword,
   });
 };
 </script>
@@ -163,6 +165,34 @@ const handleSignup = async () => {
 
 /* BaseInput maneja .form-group, label, input styles by default */
 /* Para este signup, el BaseInput por defecto tiene los colores correctos. */
+
+/* Personalización de BaseButton para coincidir con el botón de login */
+.signup-container :deep(.btn-signup) {
+  width: 100% !important;
+  padding: 15px !important;
+  border: none !important;
+  border-radius: 12px !important; /* Bordes más redondeados */
+  font-size: 18px !important;
+  font-weight: bold !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #FF007F !important; /* Color magenta/fucsia igual al botón de login */
+  color: white !important;
+}
+
+.signup-container :deep(.btn-signup:hover:not(:disabled)) {
+  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+}
+
+.signup-container :deep(.btn-signup:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #CCCCCC !important;
+}
+
+.signup-container :deep(.btn-signup:not(:disabled)) {
+  background-color: #FF007F !important;
+}
 
 .login-link {
   text-align: center;
