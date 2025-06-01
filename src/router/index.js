@@ -29,6 +29,7 @@ import ProfileView from '@/views/Profile/ProfileView.vue'
 import EditProfileView from '@/views/Profile/EditProfileView.vue'
 import ChangePasswordView from '@/views/Profile/ChangePasswordView.vue'
 import SettingsView from '@/views/Profile/SettingsView.vue'
+import ContactView from '@/views/Profile/ContactView.vue'
 
 // Other
 import NotFoundView from '@/views/NotFoundView.vue'
@@ -54,7 +55,7 @@ const routes = [
     component: ForgotPasswordEmailView
   },
   {
-    path: '/forgot-password/new',
+    path: '/forgot-password/new/:token',
     name: 'ForgotPasswordNew',
     component: ForgotPasswordNewView
   },
@@ -149,6 +150,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/contact',
+    name: 'Contact',
+    component: ContactView,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFoundView
@@ -166,14 +173,24 @@ const router = createRouter({
   }
 })
 
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
-  } else {
+router.beforeEach(async (to, from, next) => {
+  // Verificar si la ruta requiere autenticación
+  if (!to.meta.requiresAuth) {
     next()
+    return
   }
+
+  // Obtener el token directamente del localStorage
+  const token = localStorage.getItem('finko_auth_token')
+  
+  if (!token) {
+    next('/login')
+    return
+  }
+
+  // Para rutas que requieren autenticación pero ya tenemos token,
+  // dejamos que el componente individual maneje la carga de datos
+  next()
 })
 
 export default router 
