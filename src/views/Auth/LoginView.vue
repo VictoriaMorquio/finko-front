@@ -56,13 +56,6 @@
           @click="$router.push('/signup')"
         />
       </form>
-
-      <!-- Demo credentials -->
-      <div class="demo-section">
-        <p class="demo-title">Credenciales de prueba:</p>
-        <p class="demo-info">Email: pedro@finko.com</p>
-        <p class="demo-info">Contraseña: 123456</p>
-      </div>
     </div>
   </div>
 </template>
@@ -287,28 +280,6 @@ const handleLogin = async () => {
 .login-container :deep(.btn-register:disabled) {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.demo-section {
-  background-color: #f8f9fa;
-  padding: 16px;
-  border-radius: 8px;
-  margin-top: 20px;
-  text-align: center;
-}
-
-.demo-title {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.demo-info {
-  font-size: 13px;
-  color: #666;
-  margin: 2px 0;
-  font-family: monospace;
 }
 
 /* Media query para pantallas muy pequeñas, si es necesario ajustar padding */
