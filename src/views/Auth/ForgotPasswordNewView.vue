@@ -35,6 +35,7 @@
           variant="primary" 
           full-width 
           style="margin-top: 10px;"
+          class="btn-confirm-password"
         >
           {{ authStore.loading ? 'Confirmando...' : 'Confirmar' }}
         </BaseButton>
@@ -148,4 +149,32 @@ const handleConfirmNewPassword = async () => {
 }
 /* BaseInput usa 'reset-password-input-style' */
 /* BaseButton usa variant 'finko-signup' */
+
+/* Personalización de BaseButton para coincidir con el botón de login */
+.container :deep(.btn-confirm-password) {
+  width: 100% !important;
+  padding: 15px !important;
+  border: none !important;
+  border-radius: 12px !important; /* Bordes más redondeados */
+  font-size: 18px !important;
+  font-weight: bold !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #FF007F !important; /* Color magenta/fucsia igual al botón de login */
+  color: white !important;
+}
+
+.container :deep(.btn-confirm-password:hover:not(:disabled)) {
+  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+}
+
+.container :deep(.btn-confirm-password:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #CCCCCC !important;
+}
+
+.container :deep(.btn-confirm-password:not(:disabled)) {
+  background-color: #FF007F !important;
+}
 </style> 
