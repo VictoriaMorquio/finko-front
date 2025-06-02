@@ -14,6 +14,8 @@ import SkillLessonsView from '@/views/Learn/SkillLessonsView.vue'
 import LevelIntroView from '@/views/Learn/LevelIntroView.vue'
 import LessonContentView from '@/views/Learn/LessonContentView.vue'
 import LessonQuizView from '@/views/Learn/LessonQuizView.vue'
+import TrueFalseStepView from '@/views/Learn/TrueFalseStepView.vue'
+import DragDropStepView from '@/views/Learn/DragDropStepView.vue'
 import LevelCompletedView from '@/views/Learn/LevelCompletedView.vue'
 
 // Invest Views
@@ -85,15 +87,27 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/learn/lesson/:lessonId',
+    path: '/learn/lesson/:lessonId/:stepId?',
     name: 'LessonContent',
     component: LessonContentView,
     meta: { requiresAuth: true }
   },
   {
-    path: '/learn/lesson/:lessonId/quiz',
+    path: '/learn/lesson/:lessonId/quiz/:stepId?',
     name: 'LessonQuiz',
     component: LessonQuizView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/learn/lesson/:lessonId/step/:stepId/true-false',
+    name: 'TrueFalseStep',
+    component: TrueFalseStepView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/learn/lesson/:lessonId/step/:stepId/drag-drop',
+    name: 'DragDropStep',
+    component: DragDropStepView,
     meta: { requiresAuth: true }
   },
   {

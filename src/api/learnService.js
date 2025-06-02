@@ -1,15 +1,11 @@
 import httpClient from './httpClient';
 import { API_CONFIG } from '../config/api.js';
-import {
-  mockLessonIntros,
-  mockLessonSteps,
-  mockLevelCompletedData
-} from './_mockData';
+import { mockLessonSteps, mockLevelCompletedData } from './_mockData.js';
 
 const USE_MOCK_DATA = API_CONFIG.USE_MOCK_DATA;
 const MOCK_DELAY = 400;
 
-// Servicios reales para API
+// Servicios reales para API - TODOS LOS ENDPOINTS IMPLEMENTADOS
 const realLearnService = {
   async getLearnDashboard() {
     const response = await httpClient.get('/learn/dashboard');
@@ -26,69 +22,142 @@ const realLearnService = {
     return response;
   },
 
-  // Los siguientes endpoints están en desarrollo, mantenemos mock por ahora
   async getLessonIntro(lessonId) {
-    // Mock temporal hasta que el backend implemente este endpoint
-    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
-    const intro = mockLessonIntros[lessonId];
-    if (intro) {
-      return intro;
-    } else {
-      throw new Error(`Introducción para lección ${lessonId} no encontrada.`);
-    }
+    const response = await httpClient.get(`/learn/lessons/${lessonId}/intro`);
+    return response;
   },
 
   async getLessonStep(lessonId, stepId) {
-    // Mock temporal hasta que el backend implemente este endpoint
-    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
-    const lesson = mockLessonSteps[lessonId];
-    if (lesson && lesson.steps && lesson.steps[stepId]) {
-      return { id: stepId, lessonId, ...lesson.steps[stepId] };
-    } else {
-      throw new Error(`Paso ${stepId} para lección ${lessonId} no encontrado.`);
-    }
+    const response = await httpClient.get(`/learn/lessons/${lessonId}/steps/${stepId}`);
+    return response;
+  },
+
+  async getLessonSteps(lessonId) {
+    const response = await httpClient.get(`/learn/lessons/${lessonId}/steps`);
+    return response;
   },
 
   async getLevelCompletedData(levelId) {
-    // Mock temporal hasta que el backend implemente este endpoint
-    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
-    const levelData = mockLevelCompletedData[levelId];
-    if (levelData) {
-      return levelData;
-    } else {
-      throw new Error(`Datos de nivel completado para ${levelId} no encontrados.`);
-    }
+    const response = await httpClient.get(`/learn/levels/${levelId}/completed`);
+    return response;
   },
 
   async submitQuiz(quizData) {
-    // Mock temporal hasta que el backend implemente este endpoint
-    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
-    console.log('Mock: Quiz submitted:', quizData);
-    return { 
-      success: true, 
-      score: Math.floor(Math.random() * 100) + 1,
-      message: 'Quiz completado correctamente'
+    const response = await httpClient.post('/learn/quiz/submit', quizData);
+    return response;
+  },
+
+  // Alias para compatibilidad con el store
+  async submitQuizAnswer(lessonId, stepId, answer) {
+    // Construir el objeto que espera el backend
+    const quizData = {
+      lessonId: lessonId,
+      stepId: stepId,
+      answer: answer
     };
+    console.log('🚀 REAL SERVICE - Enviando quiz data al backend:', quizData);
+    return this.submitQuiz(quizData);
+  },
+
+  // Nuevos endpoints para sistema de repasos
+  async getReviewStatus(lessonId) {
+    const response = await httpClient.get(`/learn/lessons/${lessonId}/review/status`);
+    return response;
+  },
+
+  async getNextReviewStep(lessonId) {
+    const response = await httpClient.get(`/learn/lessons/${lessonId}/review/next`);
+    return response;
+  },
+
+  async resetReviewQueue(lessonId) {
+    const response = await httpClient.post(`/learn/lessons/${lessonId}/review/reset`);
+    return response;
   }
 };
 
 // Servicios mock (solo para desarrollo cuando USE_MOCK_DATA es true)
 const mockLearnService = {
-  getLearnDashboard: () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const generalProgress = Math.floor(Math.random() * 100);
-        resolve({
-          generalProgress,
-          units: [
-            { id: 'unit1', title: 'Unidad 1:<br>Fundamentos del Dinero', description: 'Conoce las bases del dinero y tus finanzas.', image: '/images/unidad1.jpg', bgColor: '#FBEAE3' },
-            { id: 'unit2', title: 'Unidad 2:<br>Introducción a la Inversión', description: 'Empieza a entender cómo hacer crecer tu dinero.', image: '/images/unidad2.jpg', bgColor: '#FDF0F3'},
-            { id: 'unit3', title: 'Unidad 3:<br>¿Dónde Puedo Invertir?', description: 'Descubre los tipos básicos de activos.', image: '/images/unidad3.jpg', bgColor: '#FBEAE3' },
-            { id: 'unit4', title: 'Unidad 4:<br>Primeros Pasos como Inversor', description: 'Aprende cómo comenzar a invertir.', image: '/images/unidad4.jpg', bgColor: '#F5F5F5' }
-          ],
-        });
-      }, MOCK_DELAY);
-    });
+  async getLearnDashboard() {
+    // Simulamos delay de red
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    return {
+      user: {
+        name: "Ana García",
+        level: 12,
+        coins: 1250,
+        xp: 3400,
+        streak: 7
+      },
+      units: [
+        {
+          id: "u1",
+          title: "Fundamentos del Dinero",
+          description: "Aprende los conceptos básicos sobre el dinero",
+          progress: 65,
+          totalSkills: 3,
+          completedSkills: 2,
+          image: "/images/units/money-basics.jpg"
+        },
+        {
+          id: "u2", 
+          title: "Ahorro e Inversión",
+          description: "Estrategias para hacer crecer tu dinero",
+          progress: 30,
+          totalSkills: 4,
+          completedSkills: 1,
+          image: "/images/units/saving-investment.jpg"
+        }
+      ]
+    };
+  },
+
+  async getLessonIntro(lessonId) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const lessonData = mockLessonSteps[lessonId];
+    if (!lessonData) {
+      throw new Error(`Lección ${lessonId} no encontrada`);
+    }
+
+    return {
+      id: lessonData.id,
+      title: lessonData.title,
+      description: lessonData.description,
+      firstStepId: lessonData.firstStepId,
+      firstStepType: lessonData.firstStepType,
+      totalSteps: lessonData.totalSteps,
+      estimatedTime: '10-15 min',
+      coinsReward: 50,
+      xpReward: 100
+    };
+  },
+
+  async getLessonStep(lessonId, stepId) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const lessonData = mockLessonSteps[lessonId];
+    if (!lessonData) {
+      throw new Error(`Lección ${lessonId} no encontrada`);
+    }
+
+    const step = lessonData.steps.find(s => s.id === stepId);
+    if (!step) {
+      throw new Error(`Step ${stepId} no encontrado en lección ${lessonId}`);
+    }
+
+    const currentStepNumber = parseInt(stepId.split('s').pop()) || 1;
+    const isLastStep = currentStepNumber >= lessonData.totalSteps;
+    
+    return {
+      ...step,
+      totalSteps: lessonData.totalSteps,
+      currentStepNumber,
+      isLastStep,
+      allSteps: lessonData.steps, // Para navegación inteligente
+      progressPercentage: (currentStepNumber / lessonData.totalSteps) * 100
+    };
   },
 
   getUnitSkills: (unitId) => {
@@ -117,30 +186,37 @@ const mockLearnService = {
     });
   },
 
-  getLessonIntro: (lessonId) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const intro = mockLessonIntros[lessonId];
-        if (intro) {
-          resolve(intro);
-        } else {
-          reject({ message: `Introducción para lección ${lessonId} no encontrada.` });
-        }
-      }, MOCK_DELAY);
-    });
-  },
+  async getSkillLessons(skillId) {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    // Mock data para lecciones de skills
+    const mockSkillLessons = {
+      'u1s1': {
+        skillId: 'u1s1',
+        title: '¿Qué es el Dinero?',
+        lessons: [
+          {
+            id: 'u1s1l1',
+            title: 'Nivel 1: Funciones del Dinero',
+            description: 'Historia básica y funciones del dinero',
+            image: '/images/lessons/u1s1l1.jpg',
+            type: 'lesson',
+            totalSteps: 5,
+            coinsReward: 50,
+            xpReward: 100,
+            progress: 100,
+            status: 'completed'
+          }
+        ]
+      }
+    };
 
-  getLessonStep: (lessonId, stepId) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const lesson = mockLessonSteps[lessonId];
-        if (lesson && lesson.steps && lesson.steps[stepId]) {
-          resolve({ id: stepId, lessonId, ...lesson.steps[stepId] });
-        } else {
-          reject({ message: `Paso ${stepId} para lección ${lessonId} no encontrado.` });
-        }
-      }, MOCK_DELAY);
-    });
+    const skillLessons = mockSkillLessons[skillId];
+    if (skillLessons) {
+      return skillLessons;
+    } else {
+      throw new Error(`Lecciones para skill ${skillId} no encontradas.`);
+    }
   },
 
   getLevelCompletedData: (levelId) => {
@@ -165,6 +241,90 @@ const mockLearnService = {
           score: Math.floor(Math.random() * 100) + 1,
           message: 'Quiz completado correctamente'
         });
+      }, MOCK_DELAY);
+    });
+  },
+
+  // Alias para compatibilidad con el store
+  submitQuizAnswer: (lessonId, stepId, answer) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const quizData = {
+          lessonId: lessonId,
+          stepId: stepId,
+          answer: answer
+        };
+        console.log('🚀 MOCK SERVICE - Quiz answer submitted:', quizData);
+        resolve({ 
+          success: true, 
+          correct: Math.random() > 0.5, // 50% de probabilidad de ser correcto
+          message: Math.random() > 0.5 ? '¡Correcto!' : 'Respuesta incorrecta'
+        });
+      }, MOCK_DELAY);
+    });
+  },
+
+  // Métodos mock para sistema de repasos
+  getReviewStatus: (lessonId) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Simular que a veces hay repasos pendientes
+        const hasPendingReviews = Math.random() > 0.7; // 30% probabilidad de tener repasos
+        const pendingCount = hasPendingReviews ? Math.floor(Math.random() * 3) + 1 : 0;
+        
+        console.log('🚀 MOCK SERVICE - Review status:', { lessonId, hasPendingReviews, pendingCount });
+        resolve({
+          lessonId,
+          hasPendingReviews,
+          pendingReviewsCount: pendingCount,
+          nextReviewStepId: hasPendingReviews ? `${lessonId}s${pendingCount + 2}` : null,
+          message: hasPendingReviews ? `Tienes ${pendingCount} pregunta(s) pendiente(s) de repaso` : 'No hay repasos pendientes'
+        });
+      }, MOCK_DELAY);
+    });
+  },
+
+  getNextReviewStep: (lessonId) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        // Simular que a veces no hay más steps de repaso
+        if (Math.random() > 0.6) {
+          console.log('🚀 MOCK SERVICE - No more review steps');
+          reject(new Error('No hay más pasos de repaso'));
+          return;
+        }
+
+        // Simular un step de repaso (mismo formato que step normal)
+        const reviewStep = {
+          id: `${lessonId}s3`, // Ejemplo de step de repaso
+          lessonId: lessonId,
+          type: 'quiz',
+          title: 'Repaso: Ejercicio sobre el Trueque',
+          question: '¿Cuál era el principal problema del trueque?',
+          options: [
+            { id: 'a', text: 'Era muy fácil' },
+            { id: 'b', text: 'Requería coincidencia de necesidades' },
+            { id: 'c', text: 'Era muy rápido' }
+          ],
+          feedback: {
+            correct: '¡Correcto! Ese era el principal problema.',
+            incorrect: 'No exactamente. El problema era la coincidencia de necesidades.'
+          },
+          isLastStep: false,
+          isReviewStep: true // Indicador especial para el frontend
+        };
+
+        console.log('🚀 MOCK SERVICE - Next review step:', reviewStep);
+        resolve(reviewStep);
+      }, MOCK_DELAY);
+    });
+  },
+
+  resetReviewQueue: (lessonId) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('🚀 MOCK SERVICE - Review queue reset for:', lessonId);
+        resolve({ success: true, message: 'Cola de repasos reseteada' });
       }, MOCK_DELAY);
     });
   }

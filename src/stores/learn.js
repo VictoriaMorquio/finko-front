@@ -78,18 +78,44 @@ export const useLearnStore = defineStore('learn', {
         }
     },
     async fetchLessonStep(lessonId, stepId) {
+      console.log('🏪 STORE - fetchLessonStep called:', { lessonId, stepId });
       this.loading = true;
       this.error = null;
       try {
         const stepData = await learnService.getLessonStep(lessonId, stepId);
+        console.log('🏪 STORE - stepData received from backend:', stepData);
+        console.log('🏪 STORE - stepData.options specifically:', stepData.options);
+        console.log('🏪 STORE - stepData keys:', Object.keys(stepData));
+        console.log('🏪 STORE - Full stepData structure:', JSON.stringify(stepData, null, 2));
+        
         this.currentLesson = {
             ...(this.currentLesson && this.currentLesson.id === lessonId ? this.currentLesson : { id: lessonId, title: 'Lección ' + lessonId }),
             currentStep: stepData,
             lessonId: lessonId,
             stepId: stepId
         };
+        
+        console.log('🏪 STORE - currentLesson updated:', this.currentLesson);
       } catch (err) {
         this.error = err.message || `Fallo al cargar el paso ${stepId} de la lección ${lessonId}.`;
+        console.error('🏪 STORE - Error in fetchLessonStep:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+    async fetchLessonSteps(lessonId) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const lessonData = await learnService.getLessonSteps(lessonId);
+        this.currentLesson = {
+            ...(this.currentLesson && this.currentLesson.id === lessonId ? this.currentLesson : {}),
+            ...lessonData,
+            allSteps: lessonData.steps
+        };
+        return lessonData;
+      } catch (err) {
+        this.error = err.message || `Fallo al cargar pasos de la lección ${lessonId}.`;
         console.error(err);
       } finally {
         this.loading = false;
@@ -131,6 +157,61 @@ export const useLearnStore = defineStore('learn', {
             if (skill) {
                 skill.progress = newProgress;
             }
+        }
+    },
+    // Métodos para sistema de repasos
+    async checkReviewStatus(lessonId) {
+        this.loading = true;
+        this.error = null;
+        try {
+            const reviewStatus = await learnService.getReviewStatus(lessonId);
+            return reviewStatus;
+        } catch (err) {
+            console.warn('⚠️ Error al verificar estado de repasos:', err.message);
+            // Devolver estado por defecto en caso de error
+            return {
+                lessonId,
+                hasPendingReviews: false,
+                pendingReviewsCount: 0,
+                nextReviewStepId: null,
+                message: 'No hay repasos pendientes'
+            };
+        } finally {
+            this.loading = false;
+        }
+    },
+    async fetchNextReviewStep(lessonId) {
+        this.loading = true;
+        this.error = null;
+        try {
+            const reviewStep = await learnService.getNextReviewStep(lessonId);
+            // Actualizar currentLesson con el step de repaso
+            this.currentLesson = {
+                ...(this.currentLesson && this.currentLesson.id === lessonId ? this.currentLesson : { id: lessonId, title: 'Lección ' + lessonId }),
+                currentStep: reviewStep,
+                lessonId: lessonId,
+                stepId: reviewStep.id,
+                isReviewMode: true
+            };
+            return reviewStep;
+        } catch (err) {
+            console.warn('⚠️ Error al cargar paso de repaso:', err.message);
+            throw err; // Re-lanzar para que handleQuizNavigation pueda manejar la finalización
+        } finally {
+            this.loading = false;
+        }
+    },
+    async resetReviewQueue(lessonId) {
+        try {
+            const result = await learnService.resetReviewQueue(lessonId);
+            // Limpiar modo repaso si existe
+            if (this.currentLesson) {
+                this.currentLesson.isReviewMode = false;
+            }
+            return result;
+        } catch (err) {
+            console.warn('⚠️ Error al resetear cola de repasos:', err.message);
+            throw err; // Re-lanzar para que el llamador pueda decidir qué hacer
         }
     }
   },

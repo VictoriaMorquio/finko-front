@@ -24,6 +24,7 @@
 import { computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useLearnStore } from '@/stores/learn';
+import { navigateToNextStep } from '@/utils/stepNavigation';
 import BaseButton from '@/components/common/BaseButton.vue';
 
 const route = useRoute();
@@ -33,9 +34,14 @@ const learnStore = useLearnStore();
 const lessonId = computed(() => route.params.lessonId);
 const stepId = computed(() => route.params.stepId);
 
-const fetchData = () => {
+const fetchData = async () => {
     if(lessonId.value && stepId.value) {
-        learnStore.fetchLessonStep(lessonId.value, stepId.value);
+        // Cargar todos los steps primero para tener la navegación completa
+        if (!learnStore.currentLesson?.allSteps) {
+            await learnStore.fetchLessonSteps(lessonId.value);
+        }
+        // Luego cargar el step específico
+        await learnStore.fetchLessonStep(lessonId.value, stepId.value);
     }
 };
 
@@ -54,19 +60,11 @@ const backRoute = computed(() => {
 
 const goToNextStep = () => {
   if (lessonStep.value?.isLastStep) {
-    // Ir a la pantalla de nivel completado
-    const levelCompletedId = lessonStep.value.levelCompletedId || lessonId.value.split('-')[0].replace('skill','unit');
-    router.push({ name: 'LevelCompleted', params: { levelId: levelCompletedId } });
-  } else if (lessonStep.value?.nextStepId) {
-    const nextStepData = learnStore.currentLesson?.lessonData?.steps?.[lessonStep.value.nextStepId] || learnStore.mockLessonSteps[lessonId.value]?.steps?.[lessonStep.value.nextStepId] ; // Acceso al mock para determinar tipo
-    if (nextStepData?.type === 'quiz' || nextStepData?.type === 'true-false') {
-        router.push({ name: 'LessonQuiz', params: { lessonId: lessonId.value, stepId: lessonStep.value.nextStepId } });
-    } else {
-        router.push({ name: 'LessonContent', params: { lessonId: lessonId.value, stepId: lessonStep.value.nextStepId } });
-    }
+    router.push({ name: 'LevelCompleted', params: { levelId: lessonId.value } });
   } else {
-    console.warn("No hay siguiente paso definido o es el último.");
-    router.push({ name: 'LearnDashboard' }); // Fallback
+    const steps = learnStore.currentLesson?.allSteps || [];
+    const isLastStep = lessonStep.value?.isLastStep || false;
+    navigateToNextStep(router, lessonId.value, stepId.value, steps, isLastStep);
   }
 };
 </script>

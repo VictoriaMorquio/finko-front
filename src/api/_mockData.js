@@ -50,6 +50,15 @@ export const mockUnitSkills = [
 ];
 
 export const mockLessonIntros = {
+    'u1s1l1': { // Nueva lección con flujo completo de 5 steps
+        id: 'u1s1l1',
+        title: "Nivel 1: Funciones del Dinero",
+        description: "Aprende qué es el dinero, sus funciones principales y cómo ha evolucionado a lo largo de la historia. Este nivel te dará una base sólida sobre conceptos financieros fundamentales.",
+        image: "/images/lessons/money-intro.jpg",
+        type: 'intro',
+        firstStepId: 'u1s1l1s1',
+        firstStepType: 'content'
+    },
     'skill1-1': { // Corresponde al ID de la habilidad que inicia esta lección/nivel
         id: 'lesson1', // ID de la lección/nivel
         title: "Nivel 1",
@@ -62,7 +71,102 @@ export const mockLessonIntros = {
 };
 
 export const mockLessonSteps = {
-    'lesson1': { // ID de la lección/nivel
+    'u1s1l1': { // ID de la lección
+        title: "Nivel 1: Funciones del Dinero", // Título general para la barra de progreso
+        totalSteps: 5, // Número total de pasos en esta lección
+        firstStepId: 'u1s1l1s1',
+        firstStepType: 'content',
+        steps: [
+            {
+                id: 'u1s1l1s1',
+                type: 'content',
+                title: 'Introducción al dinero',
+                text: '<p>El dinero es un medio de intercambio que facilita el comercio...</p>',
+                image: '/images/lessons/money-intro.jpg'
+            },
+            {
+                id: 'u1s1l1s2', 
+                type: 'true-false',
+                statement: 'El dinero siempre ha existido en forma de monedas y billetes',
+                correctAnswer: 'false',
+                feedback: {
+                    correct: '¡Correcto! El dinero ha evolucionado desde el trueque hasta las formas digitales actuales.',
+                    incorrect: 'No es correcto. El dinero ha tenido muchas formas a lo largo de la historia, desde el trueque hasta las monedas digitales.'
+                }
+            },
+            {
+                id: 'u1s1l1s3',
+                type: 'content', 
+                title: 'Funciones del dinero',
+                text: '<p>El dinero cumple tres funciones principales: medio de intercambio, unidad de cuenta y reserva de valor...</p>',
+                image: '/images/lessons/money-functions.jpg'
+            },
+            {
+                id: 'u1s1l1s4',
+                type: 'drag-drop',
+                question: 'Clasifica estos elementos según su función monetaria',
+                categories: [
+                    {
+                        id: 'intercambio',
+                        title: 'Medio de Intercambio',
+                        description: 'Facilita el comercio',
+                        color: '#4CAF50'
+                    },
+                    {
+                        id: 'cuenta',
+                        title: 'Unidad de Cuenta', 
+                        description: 'Mide valor',
+                        color: '#2196F3'
+                    },
+                    {
+                        id: 'valor',
+                        title: 'Reserva de Valor',
+                        description: 'Guarda riqueza',
+                        color: '#FF9800'
+                    }
+                ],
+                items: [
+                    {
+                        id: 'item1',
+                        text: 'Comprar café con billetes',
+                        correctCategory: 'intercambio'
+                    },
+                    {
+                        id: 'item2', 
+                        text: 'Precios en el supermercado',
+                        correctCategory: 'cuenta'
+                    },
+                    {
+                        id: 'item3',
+                        text: 'Cuenta de ahorros',
+                        correctCategory: 'valor'
+                    },
+                    {
+                        id: 'item4',
+                        text: 'Pagar la renta',
+                        correctCategory: 'intercambio'
+                    }
+                ]
+            },
+            {
+                id: 'u1s1l1s5',
+                type: 'quiz',
+                question: '¿Cuál NO es una función del dinero?',
+                options: [
+                    { id: 'a', text: 'Medio de intercambio' },
+                    { id: 'b', text: 'Unidad de cuenta' }, 
+                    { id: 'c', text: 'Reserva de valor' },
+                    { id: 'd', text: 'Generación de energía' }
+                ],
+                correctAnswer: 'd',
+                feedback: {
+                    correct: '¡Exacto! La generación de energía no es una función del dinero.',
+                    incorrect: 'Revisa las tres funciones principales del dinero: medio de intercambio, unidad de cuenta y reserva de valor.'
+                }
+            }
+        ]
+    },
+    'lesson1': { // Mantener compatibilidad con datos anteriores
         title: "Nivel 1: Fundamentos", // Título general para la barra de progreso
         totalSteps: 3, // Número total de pasos en esta lección
         steps: {

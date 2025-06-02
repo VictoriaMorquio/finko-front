@@ -24,6 +24,7 @@
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useLearnStore } from '@/stores/learn';
+import { navigateToFirstStep } from '@/utils/stepNavigation';
 import BaseButton from '@/components/common/BaseButton.vue';
 
 const route = useRoute();
@@ -37,16 +38,19 @@ onMounted(() => {
 
 const lessonIntro = computed(() => learnStore.currentLesson);
 
-const startLesson = () => {
-  if (lessonIntro.value && lessonIntro.value.firstStepId) {
-    router.push({
-        name: 'LessonContent', // O determinar el tipo de step y ir a Quiz si es quiz
-        params: { lessonId: lessonIntro.value.id, stepId: lessonIntro.value.firstStepId }
-    });
-  } else {
-      console.error("No hay primer paso definido para esta lección.");
-      // Podría redirigir a dashboard o mostrar error.
+const startLesson = async () => {
+  try {
+    // Resetear cola de repasos al comenzar lección desde el principio
+    console.log('🔄 Reseteando cola de repasos para lección:', levelId);
+    await learnStore.resetReviewQueue(levelId);
+    console.log('✅ Cola de repasos reseteada exitosamente');
+  } catch (error) {
+    console.warn('⚠️ No se pudo resetear cola de repasos (esto es opcional):', error.message);
+    // No es crítico que falle el reset, continuamos de todas formas
   }
+  
+  // Siempre navegar al primer step, incluso si el reset falla
+  navigateToFirstStep(router, lessonIntro.value);
 };
 
 // Función heurística para intentar obtener el unitId desde el levelId (skillId)

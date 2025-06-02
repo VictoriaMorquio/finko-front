@@ -21,13 +21,19 @@ export const API_CONFIG = {
       DELETE_ACCOUNT: '/auth/me/account'
     },
     LEARN: {
+      // ✅ TODOS LOS ENDPOINTS IMPLEMENTADOS Y FUNCIONANDO
       DASHBOARD: '/learn/dashboard',
       UNIT_SKILLS: '/learn/units/{unitId}/skills',
-      // Endpoints en desarrollo (usando mock por ahora)
+      SKILL_LESSONS: '/learn/skills/{skillId}/lessons',
       LESSON_INTRO: '/learn/lessons/{lessonId}/intro',
+      LESSON_STEPS: '/learn/lessons/{lessonId}/steps',
       LESSON_STEP: '/learn/lessons/{lessonId}/steps/{stepId}',
       LEVEL_COMPLETED: '/learn/levels/{levelId}/completed',
-      QUIZ_SUBMIT: '/learn/quiz/submit'
+      QUIZ_SUBMIT: '/learn/quiz/submit',
+      // ✅ NUEVOS ENDPOINTS DE SISTEMA DE REPASOS
+      REVIEW_STATUS: '/learn/lessons/{lessonId}/review/status',
+      REVIEW_NEXT: '/learn/lessons/{lessonId}/review/next',
+      REVIEW_RESET: '/learn/lessons/{lessonId}/review/reset'
     },
     SUPPORT: {
       CONTACT: '/support/contact',
