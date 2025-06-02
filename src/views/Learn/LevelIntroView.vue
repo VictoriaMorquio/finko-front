@@ -1,7 +1,7 @@
 <template>
   <div class="level-intro-page" v-if="lessonIntro">
     <section class="hero-section">
-      <router-link :to="{ name: 'UnitSkills', params: { unitId: getUnitIdFromLessonId(lessonId) } }" class="back-arrow" aria-label="Volver">←</router-link>
+      <router-link :to="{ name: 'UnitSkills', params: { unitId: getUnitIdFromLessonId(levelId) } }" class="back-arrow" aria-label="Volver">←</router-link>
       <img :src="lessonIntro.image" :alt="lessonIntro.title" class="level-artwork">
     </section>
 
@@ -29,10 +29,10 @@ import BaseButton from '@/components/common/BaseButton.vue';
 const route = useRoute();
 const router = useRouter();
 const learnStore = useLearnStore();
-const lessonId = route.params.lessonId; // Este ID es el de la habilidad/lección
+const levelId = route.params.levelId; // Este ID es el de la habilidad/level
 
 onMounted(() => {
-  learnStore.fetchLessonIntro(lessonId);
+  learnStore.fetchLessonIntro(levelId);
 });
 
 const lessonIntro = computed(() => learnStore.currentLesson);
@@ -49,11 +49,11 @@ const startLesson = () => {
   }
 };
 
-// Función heurística para intentar obtener el unitId desde el lessonId (skillId)
+// Función heurística para intentar obtener el unitId desde el levelId (skillId)
 // Ejemplo: skillId = "skill1-2", unitId sería "unit1"
-const getUnitIdFromLessonId = (lessonId) => {
-    if (lessonId && lessonId.startsWith('skill')) {
-        return lessonId.split('-')[0].replace('skill', 'unit');
+const getUnitIdFromLessonId = (levelId) => {
+    if (levelId && levelId.startsWith('skill')) {
+        return levelId.split('-')[0].replace('skill', 'unit');
     }
     return 'unit1'; // Fallback, idealmente esta info vendría de la API o store.
 };

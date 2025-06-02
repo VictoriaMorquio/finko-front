@@ -45,10 +45,8 @@ onMounted(() => {
 const unitData = computed(() => learnStore.currentUnitSkills);
 
 const navigateToSkill = (skillId) => {
-  // La navegación a una lección/habilidad puede ser compleja.
-  // Podría ir a una pantalla de "Introducción a la Lección" o directamente al primer paso.
-  // Asumimos que cada skill ID mapea a un ID de lección/intro.
-  router.push({ name: 'LevelIntro', params: { lessonId: skillId } });
+  // Navegar a las lecciones de la skill
+  router.push({ name: 'SkillLessons', params: { skillId: skillId } });
 };
 </script>
 
