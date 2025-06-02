@@ -7,6 +7,7 @@ export const useLearnStore = defineStore('learn', {
     generalProgress: 0,
     units: [],
     currentUnitSkills: null,
+    currentSkillLessons: null,
     currentLesson: null,
     loading: false,
     error: null,
@@ -44,6 +45,20 @@ export const useLearnStore = defineStore('learn', {
         this.currentUnitSkills = data;
       } catch (err) {
         this.error = err.message || `Fallo al cargar habilidades para la unidad ${unitId}.`;
+        console.error(err);
+      } finally {
+        this.loading = false;
+      }
+    },
+    async fetchSkillLessons(skillId) {
+      this.loading = true;
+      this.error = null;
+      this.currentSkillLessons = null;
+      try {
+        const data = await learnService.getSkillLessons(skillId);
+        this.currentSkillLessons = data;
+      } catch (err) {
+        this.error = err.message || `Fallo al cargar lecciones para la habilidad ${skillId}.`;
         console.error(err);
       } finally {
         this.loading = false;
