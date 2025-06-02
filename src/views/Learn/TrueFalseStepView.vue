@@ -1,78 +1,75 @@
 <template>
   <div class="true-false-page-container">
-    <PageHeader
-      :show-back="false"
-      :show-logo="true"
+    <!-- LessonProgressBar DENTRO del contenedor para incluirlo en 100vh -->
+    <LessonProgressBar
+      :current-step-number="progressData.currentStepNumber.value"
+      :total-steps="progressData.totalSteps.value"
+      :lesson-title="progressData.lessonTitle.value"
+      :is-review-mode="isReviewMode"
     />
 
     <main class="true-false-main-content" v-if="stepData">
-      <!-- Barra de progreso -->
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div 
-            class="progress-fill" 
-            :class="{ 'review-progress': isReviewMode }"
-            :style="{ width: progressPercentage + '%' }"
-          ></div>
-        </div>
-        <span class="progress-text">{{ currentStepNumber }}/{{ totalSteps }}</span>
-      </div>
-      
-      <div v-if="isReviewMode" class="review-indicator">
-        <span class="review-badge">🔄 REPASO</span>
-        <p class="review-text">Modo Repaso - Repasa las preguntas que fallaste</p>
-      </div>
-
       <!-- Contenido del ejercicio -->
       <div class="exercise-container">
         <div class="statement-section">
-          <h2 class="statement-title">
-            ¿Es esto verdadero o falso?
-            <span v-if="isReviewMode" class="review-badge-inline">🔄 REPASO</span>
-          </h2>
+          <h2 class="statement-title">{{ stepData.title }}</h2>
           <div class="statement-box">
             <p class="statement-text">{{ stepData.statement }}</p>
           </div>
         </div>
 
-        <!-- Botones de respuesta -->
         <div class="answer-section">
-          <div class="answer-buttons" v-if="!answered">
-            <button
-              class="answer-btn false-btn"
-              @click="submitAnswer(false)"
-              :disabled="loading"
+          <div class="answer-buttons">
+            <button 
+              @click="submitAnswer(true)"
+              :disabled="answered"
+              class="answer-btn"
+              :class="{ 
+                'correct': answered && isCorrect === true,
+                'incorrect': answered && selectedAnswer === true && !isCorrect 
+              }"
             >
-              <span class="btn-text">Falso</span>
+              <span class="answer-icon">✓</span>
+              <span class="answer-text">Verdadero</span>
             </button>
             
-            <button
-              class="answer-btn true-btn"
-              @click="submitAnswer(true)"
-              :disabled="loading"
+            <button 
+              @click="submitAnswer(false)"
+              :disabled="answered"
+              class="answer-btn"
+              :class="{ 
+                'correct': answered && isCorrect === false,
+                'incorrect': answered && selectedAnswer === false && !isCorrect 
+              }"
             >
-              <span class="btn-text">Verdadero</span>
+              <span class="answer-icon">✗</span>
+              <span class="answer-text">Falso</span>
             </button>
           </div>
 
-          <!-- Feedback -->
-          <div class="feedback-section" v-if="answered">
-            <div class="feedback-box" :class="{ 'correct': isCorrect, 'incorrect': !isCorrect }">
-              <div class="feedback-content">
-                <h3 class="feedback-title">
-                  {{ isCorrect ? '¡Correcto!' : 'Incorrecto' }}
-                </h3>
-                <p class="feedback-text">{{ stepData.feedback[isCorrect ? 'correct' : 'incorrect'] }}</p>
-              </div>
+          <!-- Feedback después de responder -->
+          <div v-if="answered && quizResult?.feedback" class="feedback-section">
+            <div class="feedback-message" :class="{ correct: isCorrect, incorrect: !isCorrect }">
+              {{ quizResult.feedback }}
             </div>
-            
-            <button class="continue-btn" @click="continueToNext">
-              {{ isLastStep ? 'Finalizar lección' : 'Continuar' }}
-            </button>
           </div>
         </div>
       </div>
     </main>
+
+    <!-- Botón de continuar como footer fijo -->
+    <footer class="continue-footer" v-if="answered && stepData">
+      <BaseButton
+        variant="primary"
+        size="large"
+        @click="continueToNext"
+        :disabled="loading"
+        full-width
+        class="btn-continue"
+      >
+        {{ progressData.currentStepNumber.value >= progressData.totalSteps.value ? 'Finalizar Nivel' : 'Continuar' }}
+      </BaseButton>
+    </footer>
 
     <div v-if="learnStore.loading && !stepData" class="loading-message">
       Cargando ejercicio...
@@ -87,8 +84,10 @@
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useLearnStore } from '@/stores/learn';
+import { useLessonProgress } from '@/composables/useLessonProgress';
 import { handleQuizNavigation, parseStepInfo } from '@/utils/stepNavigation';
-import PageHeader from '@/components/common/PageHeader.vue';
+import BaseButton from '@/components/common/BaseButton.vue';
+import LessonProgressBar from '@/components/common/LessonProgressBar.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -96,6 +95,9 @@ const learnStore = useLearnStore();
 
 const lessonId = route.params.lessonId;
 const stepId = route.params.stepId;
+
+// Usar el composable para progreso real
+const progressData = useLessonProgress(stepId);
 
 const answered = ref(false);
 const isCorrect = ref(false);
@@ -118,10 +120,6 @@ onMounted(async () => {
 });
 
 const stepData = computed(() => learnStore.currentLesson?.currentStep);
-const currentStepNumber = computed(() => parseInt(stepId.split('s').pop()) || 1);
-const totalSteps = computed(() => stepData.value?.totalSteps || 1);
-const progressPercentage = computed(() => (currentStepNumber.value / totalSteps.value) * 100);
-const isLastStep = computed(() => currentStepNumber.value >= totalSteps.value);
 
 const submitAnswer = async (answer) => {
   if (loading.value || answered.value) return;
@@ -155,6 +153,7 @@ const submitAnswer = async (answer) => {
 const continueToNext = async () => {
   const steps = learnStore.currentLesson?.allSteps || [];
   const wasCorrect = isCorrect.value; // Usar el estado local de correcto/incorrecto
+  const isLastStep = progressData.currentStepNumber.value >= progressData.totalSteps.value;
   
   // Usar handleQuizNavigation para incluir verificación de repasos
   const result = await handleQuizNavigation(
@@ -163,7 +162,7 @@ const continueToNext = async () => {
     lessonId, 
     stepId, 
     steps, 
-    isLastStep.value, 
+    isLastStep, 
     isReviewMode.value,
     wasCorrect
   );
@@ -197,40 +196,10 @@ const getSkillIdFromLessonId = (lessonId) => {
 }
 
 .true-false-main-content {
-  flex: 1;
-  padding: 20px;
+  flex-grow: 1;
+  padding: 15px 20px;
   display: flex;
   flex-direction: column;
-}
-
-.progress-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 30px;
-}
-
-.progress-bar {
-  flex: 1;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: #10b981;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.progress-text {
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  min-width: 50px;
-  text-align: right;
 }
 
 .exercise-container {
@@ -240,31 +209,32 @@ const getSkillIdFromLessonId = (lessonId) => {
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
+  justify-content: space-around;
 }
 
 .statement-section {
-  margin-bottom: 40px;
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .statement-title {
   color: white;
   font-size: 20px;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .statement-box {
   background: white;
   border-radius: 16px;
-  padding: 30px;
+  padding: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .statement-text {
-  font-size: 18px;
+  font-size: 17px;
   color: #333;
-  line-height: 1.6;
+  line-height: 1.5;
   margin: 0;
 }
 
@@ -279,14 +249,14 @@ const getSkillIdFromLessonId = (lessonId) => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .answer-btn {
   background: white;
   border: none;
   border-radius: 16px;
-  padding: 24px 20px;
+  padding: 22px 18px;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -294,8 +264,8 @@ const getSkillIdFromLessonId = (lessonId) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 80px;
+  gap: 6px;
+  min-height: 75px;
 }
 
 .answer-btn:hover:not(:disabled) {
@@ -312,111 +282,76 @@ const getSkillIdFromLessonId = (lessonId) => {
   cursor: not-allowed;
 }
 
-.false-btn {
-  background: white;
-  border: 2px solid #ef4444;
-}
-
-.false-btn .btn-text {
-  color: #ef4444;
-  font-weight: bold;
-}
-
-.false-btn:hover:not(:disabled) {
-  background: #fef2f2;
-  border: 2px solid #dc2626;
-}
-
-.false-btn:hover:not(:disabled) .btn-text {
-  color: #dc2626;
-}
-
-.true-btn {
-  background: white;
-  border: 2px solid #10b981;
-}
-
-.true-btn .btn-text {
-  color: #10b981;
-  font-weight: bold;
-}
-
-.true-btn:hover:not(:disabled) {
+.answer-btn.correct {
   background: #f0fdf4;
   border: 2px solid #059669;
 }
 
-.true-btn:hover:not(:disabled) .btn-text {
-  color: #059669;
+.answer-btn.incorrect {
+  background: #fef2f2;
+  border: 2px solid #ef4444;
 }
 
-.btn-icon {
-  font-size: 32px;
+.answer-icon {
+  font-size: 30px;
 }
 
-.btn-text {
-  font-size: 18px;
+.answer-text {
+  font-size: 17px;
   font-weight: 600;
-  /* Color se define específicamente en .true-btn y .false-btn */
 }
 
 .feedback-section {
   text-align: center;
+  margin-top: 15px;
 }
 
-.feedback-box {
+.feedback-message {
   background: white;
   border-radius: 16px;
-  padding: 30px;
-  margin-bottom: 20px;
+  padding: 18px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  line-height: 1.4;
 }
 
-.feedback-box.correct {
+.feedback-message.correct {
   border: 3px solid #10b981;
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
 }
 
-.feedback-box.incorrect {
+.feedback-message.incorrect {
   border: 3px solid #ef4444;
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
 }
 
-.feedback-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+.continue-footer {
+  background: transparent;
+  padding: 15px 20px;
+  border-top: none;
+  position: sticky;
+  bottom: 0;
+  z-index: 90;
 }
 
-.feedback-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 12px;
-  color: #333;
-}
-
-.feedback-text {
-  font-size: 16px;
-  color: #666;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.continue-btn {
+.btn-continue {
   background: #FF007F !important;
   color: white !important;
   border: 2px solid white !important;
   border-radius: 12px !important;
-  padding: 15px 32px !important;
-  font-size: 18px !important;
+  padding: 12px 24px !important;
+  font-size: 17px !important;
   font-weight: bold !important;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  width: auto;
-  min-width: 200px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  display: block;
 }
 
-.continue-btn:hover {
+.btn-continue:hover {
   background: #E60072 !important;
   transform: none;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
@@ -442,6 +377,15 @@ const getSkillIdFromLessonId = (lessonId) => {
     padding: 16px;
   }
   
+  .statement-section {
+    margin-bottom: 16px;
+  }
+  
+  .statement-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+  
   .statement-box {
     padding: 20px;
   }
@@ -452,27 +396,93 @@ const getSkillIdFromLessonId = (lessonId) => {
   
   .answer-buttons {
     gap: 16px;
+    margin-bottom: 16px;
   }
   
   .answer-btn {
     padding: 20px 16px;
-    min-height: 100px;
+    min-height: 75px;
   }
   
-  .btn-icon {
-    font-size: 24px;
+  .answer-icon {
+    font-size: 28px;
   }
   
-  .btn-text {
+  .answer-text {
     font-size: 16px;
   }
   
-  .feedback-box {
-    padding: 20px;
+  .feedback-message {
+    padding: 18px;
+    font-size: 14px;
+    margin-bottom: 16px;
   }
   
-  .feedback-title {
-    font-size: 20px;
+  .continue-footer {
+    padding: 16px 0;
+  }
+  
+  .btn-continue {
+    padding: 12px 24px !important;
+    font-size: 16px !important;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .true-false-main-content {
+    padding: 12px;
+  }
+  
+  .statement-section {
+    margin-bottom: 12px;
+  }
+  
+  .statement-title {
+    font-size: 17px;
+    margin-bottom: 12px;
+  }
+  
+  .statement-box {
+    padding: 18px;
+  }
+  
+  .statement-text {
+    font-size: 15px;
+  }
+  
+  .answer-buttons {
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .answer-btn {
+    padding: 18px 14px;
+    min-height: 70px;
+  }
+  
+  .answer-icon {
+    font-size: 26px;
+  }
+  
+  .answer-text {
+    font-size: 15px;
+  }
+  
+  .feedback-message {
+    padding: 16px;
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+  
+  .continue-footer {
+    padding: 12px 0;
+  }
+  
+  .btn-continue {
+    padding: 10px 20px !important;
+    font-size: 15px !important;
+    min-width: 160px;
   }
 }
 

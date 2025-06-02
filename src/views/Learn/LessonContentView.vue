@@ -1,5 +1,12 @@
 <template>
   <div class="lesson-page-container" v-if="lessonStep">
+    <LessonProgressBar
+      :current-step-number="progressData.currentStepNumber.value"
+      :total-steps="progressData.totalSteps.value"
+      :lesson-title="progressData.lessonTitle.value"
+      :is-review-mode="progressData.isReviewMode.value"
+    />
+    
     <header class="simple-header">
       <!-- Sin navegación hacia atrás en lecciones -->
     </header>
@@ -30,8 +37,10 @@
 import { computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useLearnStore } from '@/stores/learn';
+import { useLessonProgress } from '@/composables/useLessonProgress';
 import { navigateToNextStep } from '@/utils/stepNavigation';
 import BaseButton from '@/components/common/BaseButton.vue';
+import LessonProgressBar from '@/components/common/LessonProgressBar.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -39,6 +48,9 @@ const learnStore = useLearnStore();
 
 const lessonId = computed(() => route.params.lessonId);
 const stepId = computed(() => route.params.stepId);
+
+// Usar el composable para progreso real
+const progressData = useLessonProgress(stepId.value);
 
 const fetchData = async () => {
     if(lessonId.value && stepId.value) {
@@ -81,21 +93,18 @@ const goToNextStep = () => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-top: 20px;
 }
 
 .simple-header {
   width: 100%;
   padding: 0 20px 15px;
-  position: fixed;
-  top: 20px;
-  left: 0;
+  /* Removido position: fixed para evitar superposición con progress bar */
   background-color: #FFFFFF;
   z-index: 100;
 }
 
 .lesson-main-content {
-  padding: 70px 25px 30px; /* Padding superior aumentado para header fijo */
+  padding: 30px 25px 30px; /* Padding superior reducido porque ya no hay header fijo */
   text-align: left;
   flex-grow: 1;
 }
@@ -171,8 +180,8 @@ const goToNextStep = () => {
 }
 
 @media (max-width: 360px) {
-  .simple-header { top: 15px; padding: 0 15px 10px; }
-  .lesson-main-content { padding: 60px 20px 25px; }
+  .simple-header { padding: 0 15px 10px; }
+  .lesson-main-content { padding: 25px 20px 25px; }
   .lesson-main-content h1 { font-size: 24px; }
   .lesson-main-content p { font-size: 16px; }
   .lesson-action-footer { padding: 15px 20px 30px; }

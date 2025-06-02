@@ -26,7 +26,7 @@ onMounted(async () => {
 const routesWithoutNav = [
   'Login', 'Signup', 'ForgotPasswordEmail', 'ForgotPasswordNew',
   'BuyStock', 'SellStock',
-  'LevelIntro', 'LessonContent', 'LessonQuiz',
+  'LevelIntro', 'LessonContent', 'LessonQuiz', 'TrueFalseStep', 'DragDropStep',
   'LevelCompleted'
 ];
 

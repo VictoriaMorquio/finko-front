@@ -1,22 +1,11 @@
 <template>
   <div class="lesson-page" v-if="lessonStep">
-    <header class="lesson-header">
-      <h1>
-        {{ learnStore.currentLesson?.title || 'Lección' }}
-        <span v-if="isReviewMode" class="review-badge">🔄 REPASO</span>
-      </h1>
-    </header>
-
-    <div class="progress-bar-container">
-      <div class="progress-bar-track">
-        <div 
-          class="progress-bar-fill" 
-          :class="{ 'review-progress': isReviewMode }"
-          :style="{ width: lessonStep.progressPercentage + '%' }"
-        ></div>
-      </div>
-      <p v-if="isReviewMode" class="review-text">Modo Repaso - Repasa las preguntas que fallaste</p>
-    </div>
+    <LessonProgressBar
+      :current-step-number="progressData.currentStepNumber.value"
+      :total-steps="progressData.totalSteps.value"
+      :lesson-title="progressData.lessonTitle.value"
+      :is-review-mode="isReviewMode"
+    />
 
     <main class="lesson-content">
       <img v-if="lessonStep.image" :src="lessonStep.image" alt="Ilustración de lección" class="lesson-image">
@@ -74,10 +63,12 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useLearnStore } from '@/stores/learn';
+import { useLessonProgress } from '@/composables/useLessonProgress';
 import { handleQuizNavigation } from '@/utils/stepNavigation';
 import OptionButton from '@/components/common/OptionButton.vue';
 import RadioOption from '@/components/common/RadioOption.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
+import LessonProgressBar from '@/components/common/LessonProgressBar.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -85,6 +76,9 @@ const learnStore = useLearnStore();
 
 const lessonId = computed(() => route.params.lessonId);
 const stepId = computed(() => route.params.stepId);
+
+// Usar el composable para progreso real
+const progressData = useLessonProgress(stepId.value);
 
 const selectedAnswer = ref(null);
 const isAnswered = ref(false);
@@ -228,54 +222,10 @@ const goToNextStep = async () => {
   min-height: 100vh;
 }
 
-.lesson-header {
-  background-color: #FBEAE3;
-  padding: 15px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center; /* Centramos el contenido */
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.lesson-header h1 {
-  font-size: 18px;
-  font-weight: bold;
-  color: #111111;
-  margin: 0;
-  text-align: center;
-}
-
-.progress-bar-container {
-  background-color: #FBEAE3;
-  padding: 0px 20px 15px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Sombra sutil, igual que header */
-  position: sticky; /* Se pega debajo del header */
-  top: 63px; /* Altura aproximada del header (ajustar si es necesario) */
-  z-index: 99;
-}
-
-.progress-bar-track {
-  background-color: #E0E0E0;
-  height: 8px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-bar-fill {
-  background-color: #4CAF50; /* Verde para el progreso de la lección */
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.3s ease-in-out;
-}
-
 .lesson-content {
   padding: 30px 20px;
   text-align: center;
   flex-grow: 1;
-  margin-top: 30px; /* Espacio adicional por la barra de progreso pegajosa */
 }
 
 .lesson-image {
@@ -365,43 +315,6 @@ const goToNextStep = async () => {
 }
 
 @media (max-width: 360px) {
-  .lesson-header h1 { font-size: 17px; }
   .lesson-content h2 { font-size: 22px; }
-}
-
-/* Estilos para modo repaso */
-.review-badge {
-  display: inline-block;
-  background: linear-gradient(135deg, #FF6B35, #F7931E);
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 4px 8px;
-  border-radius: 12px;
-  margin-left: 8px;
-  animation: pulse-review 2s infinite;
-}
-
-.review-progress {
-  background: linear-gradient(90deg, #FF6B35, #F7931E) !important;
-}
-
-.review-text {
-  text-align: center;
-  color: #FF6B35;
-  font-size: 14px;
-  font-weight: 500;
-  margin: 8px 0 0 0;
-  animation: fade-in 0.5s ease-in;
-}
-
-@keyframes pulse-review {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 </style> 
