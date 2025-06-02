@@ -1,7 +1,7 @@
 <template>
   <div class="lesson-page-container" v-if="lessonStep">
     <header class="simple-header">
-      <router-link :to="backRoute" class="back-arrow" aria-label="Volver">←</router-link>
+      <!-- Sin navegación hacia atrás en lecciones -->
     </header>
 
     <main class="lesson-main-content">
@@ -11,7 +11,13 @@
     </main>
 
     <footer class="lesson-action-footer">
-      <BaseButton variant="primary" @click="goToNextStep" full-width>
+      <BaseButton 
+        variant="primary" 
+        size="large"
+        @click="goToNextStep" 
+        full-width
+        class="btn-continuar-leccion"
+      >
         {{ lessonStep.isLastStep ? 'Finalizar Nivel' : 'Continuar' }}
       </BaseButton>
     </footer>
@@ -88,16 +94,6 @@ const goToNextStep = () => {
   z-index: 100;
 }
 
-.simple-header .back-arrow {
-  font-size: 28px;
-  color: #333333;
-  text-decoration: none;
-  padding: 5px;
-}
-.simple-header .back-arrow:hover {
-  color: #000000;
-}
-
 .lesson-main-content {
   padding: 70px 25px 30px; /* Padding superior aumentado para header fijo */
   text-align: left;
@@ -138,6 +134,30 @@ const goToNextStep = () => {
   bottom: 0;
   z-index: 90;
 }
+
+/* Estilo del botón para coincidir con el de login */
+.lesson-action-footer :deep(.btn-continuar-leccion) {
+  width: 100% !important;
+  padding: 15px !important;
+  border: none !important;
+  border-radius: 12px !important; /* Bordes más redondeados como en login */
+  font-size: 18px !important;
+  font-weight: bold !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #FF007F !important; /* Color fucsia igual que login */
+  color: white !important;
+}
+
+.lesson-action-footer :deep(.btn-continuar-leccion:hover:not(:disabled)) {
+  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+}
+
+.lesson-action-footer :deep(.btn-continuar-leccion:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* BaseButton usa variant finko-continue-lesson (o similar) */
 .loading-message, .error-message-centered {
   text-align: center;
@@ -152,7 +172,6 @@ const goToNextStep = () => {
 
 @media (max-width: 360px) {
   .simple-header { top: 15px; padding: 0 15px 10px; }
-  .simple-header .back-arrow { font-size: 26px; }
   .lesson-main-content { padding: 60px 20px 25px; }
   .lesson-main-content h1 { font-size: 24px; }
   .lesson-main-content p { font-size: 16px; }

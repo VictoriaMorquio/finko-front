@@ -1,7 +1,7 @@
 <template>
   <div class="level-intro-page" v-if="lessonIntro">
     <section class="hero-section">
-      <router-link :to="{ name: 'UnitSkills', params: { unitId: getUnitIdFromLessonId(levelId) } }" class="back-arrow" aria-label="Volver">←</router-link>
+      <router-link :to="{ name: 'SkillLessons', params: { skillId: getSkillIdFromLevelId(levelId) } }" class="close-btn" aria-label="Cerrar">×</router-link>
       <img :src="lessonIntro.image" :alt="lessonIntro.title" class="level-artwork">
     </section>
 
@@ -11,7 +11,13 @@
     </section>
 
     <footer class="action-footer">
-      <BaseButton variant="primary" @click="startLesson" full-width>
+      <BaseButton 
+        variant="primary" 
+        size="large"
+        @click="startLesson" 
+        full-width
+        class="btn-comenzar"
+      >
         Comenzar
       </BaseButton>
     </footer>
@@ -41,11 +47,8 @@ const lessonIntro = computed(() => learnStore.currentLesson);
 const startLesson = async () => {
   try {
     // Resetear cola de repasos al comenzar lección desde el principio
-    console.log('🔄 Reseteando cola de repasos para lección:', levelId);
     await learnStore.resetReviewQueue(levelId);
-    console.log('✅ Cola de repasos reseteada exitosamente');
   } catch (error) {
-    console.warn('⚠️ No se pudo resetear cola de repasos (esto es opcional):', error.message);
     // No es crítico que falle el reset, continuamos de todas formas
   }
   
@@ -60,6 +63,34 @@ const getUnitIdFromLessonId = (levelId) => {
         return levelId.split('-')[0].replace('skill', 'unit');
     }
     return 'unit1'; // Fallback, idealmente esta info vendría de la API o store.
+};
+
+const getSkillIdFromLevelId = (levelId) => {
+    // Patrones posibles:
+    // - "skill1-1" -> "skill1" 
+    // - "u1s1l1" -> "u1s1"
+    // - "u1s1" -> "u1s1"
+    
+    if (levelId) {
+        // Si tiene formato "skill1-1", extraer "skill1"
+        if (levelId.startsWith('skill') && levelId.includes('-')) {
+            const skillId = levelId.split('-')[0];
+            return skillId;
+        }
+        
+        // Si tiene formato "u1s1l1", extraer "u1s1"
+        if (levelId.includes('l')) {
+            const skillId = levelId.split('l')[0]; // "u1s1l1" -> "u1s1"
+            return skillId;
+        }
+        
+        // Si ya es un skillId (formato "u1s1"), devolverlo tal como está
+        if (levelId.match(/^u\d+s\d+$/)) {
+            return levelId;
+        }
+    }
+    
+    return 'u1s1'; // Fallback más realista
 };
 
 </script>
@@ -79,7 +110,7 @@ const getUnitIdFromLessonId = (levelId) => {
   position: relative;
 }
 
-.back-arrow {
+.close-btn {
   position: absolute;
   top: 25px;
   left: 20px;
@@ -89,7 +120,7 @@ const getUnitIdFromLessonId = (levelId) => {
   padding: 5px;
   z-index: 10;
 }
-.back-arrow:hover {
+.close-btn:hover {
   color: #000000;
 }
 
@@ -130,6 +161,30 @@ const getUnitIdFromLessonId = (levelId) => {
   position: sticky; /* Para que se quede abajo si el contenido es poco */
   bottom: 0;
 }
+
+/* Estilo del botón para coincidir con el de login */
+.action-footer :deep(.btn-comenzar) {
+  width: 100% !important;
+  padding: 15px !important;
+  border: none !important;
+  border-radius: 12px !important; /* Bordes más redondeados como en login */
+  font-size: 18px !important;
+  font-weight: bold !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #FF007F !important; /* Color fucsia igual que login */
+  color: white !important;
+}
+
+.action-footer :deep(.btn-comenzar:hover:not(:disabled)) {
+  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+}
+
+.action-footer :deep(.btn-comenzar:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* BaseButton usa variant finko-start-level */
 .loading-message, .error-message-centered {
   text-align: center;
@@ -143,7 +198,7 @@ const getUnitIdFromLessonId = (levelId) => {
 }
 
 @media (max-width: 360px) {
-  .back-arrow { top: 20px; left: 15px; font-size: 26px; }
+  .close-btn { top: 20px; left: 15px; font-size: 26px; }
   .level-artwork { margin-top: 15px; }
   .details-section h1 { font-size: 28px; }
   .details-section p { font-size: 16px; }

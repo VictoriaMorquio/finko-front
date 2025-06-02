@@ -28,11 +28,15 @@ export const getImageUrl = (imagePath) => {
  * @param {string} fallbackPath - Imagen local de fallback (opcional)
  * @returns {string} URL de la imagen
  */
-export const getImageUrlWithFallback = (imagePath, fallbackPath = '/images/placeholder.jpg') => {
+export const getImageUrlWithFallback = async (imagePath, fallbackPath = '/images/placeholder.jpg') => {
   try {
-    return getImageUrl(imagePath);
+    const backendSrc = getImageUrl(imagePath);
+    const response = await fetch(backendSrc);
+    if (response.ok) {
+      return backendSrc;
+    }
   } catch (error) {
-    console.warn('Error loading image from backend, using fallback:', error);
-    return fallbackPath;
+    // En caso de error, usar fallback
   }
+  return fallbackPath;
 }; 

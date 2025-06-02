@@ -22,7 +22,13 @@
     </main>
 
     <footer class="completion-footer">
-      <BaseButton variant="primary" @click="continueLearning" full-width>
+      <BaseButton 
+        variant="primary" 
+        size="large"
+        @click="continueLearning" 
+        full-width
+        class="btn-continuar"
+      >
         Continuar
       </BaseButton>
     </footer>
@@ -65,7 +71,7 @@ const continueLearning = async () => {
       try {
         await authStore.refreshUserData();
       } catch (err) {
-        console.warn('Could not sync data with server, using optimistic update:', err);
+        // En caso de error de sincronización, la actualización optimista ya se aplicó
       }
   }
 
@@ -193,6 +199,30 @@ const continueLearning = async () => {
   bottom: 0;
   z-index: 90;
 }
+
+/* Estilo del botón para coincidir con el de login */
+.completion-footer :deep(.btn-continuar) {
+  width: 100% !important;
+  padding: 15px !important;
+  border: none !important;
+  border-radius: 12px !important; /* Bordes más redondeados como en login */
+  font-size: 18px !important;
+  font-weight: bold !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #FF007F !important; /* Color fucsia igual que login */
+  color: white !important;
+}
+
+.completion-footer :deep(.btn-continuar:hover:not(:disabled)) {
+  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+}
+
+.completion-footer :deep(.btn-continuar:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* BaseButton usa variant finko-continue-lesson (o similar) */
 .loading-message, .error-message-centered {
   text-align: center;

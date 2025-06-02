@@ -1,12 +1,10 @@
 <template>
   <div class="lesson-page" v-if="lessonStep">
     <header class="lesson-header">
-      <router-link :to="backRoute" class="back-arrow" aria-label="Volver">←</router-link>
       <h1>
         {{ learnStore.currentLesson?.title || 'Lección' }}
         <span v-if="isReviewMode" class="review-badge">🔄 REPASO</span>
       </h1>
-      <router-link :to="{name: 'LearnDashboard'}" class="close-button" aria-label="Cerrar">×</router-link>
     </header>
 
     <div class="progress-bar-container">
@@ -58,9 +56,11 @@
     <footer class="lesson-footer">
       <BaseButton
         variant="primary"
+        size="large"
         @click="checkAnswer"
         :disabled="!selectedAnswer && !isAnswered"
         full-width
+        class="btn-quiz"
       >
         {{ isAnswered ? (lessonStep.isLastStep ? 'Finalizar Nivel' : 'Siguiente') : 'Comprobar' }}
       </BaseButton>
@@ -101,11 +101,6 @@ const trueFalseChoices = [
 ];
 
 const fetchData = async () => {
-    console.log('🚀 DEBUG - fetchData started:', {
-        lessonId: lessonId.value,
-        stepId: stepId.value
-    });
-    
     selectedAnswer.value = null;
     isAnswered.value = false;
     quizResult.value = null;
@@ -113,16 +108,12 @@ const fetchData = async () => {
         try {
             // Cargar todos los steps primero para tener la navegación completa
             if (!learnStore.currentLesson?.allSteps) {
-                console.log('📚 DEBUG - Loading all lesson steps...');
                 await learnStore.fetchLessonSteps(lessonId.value);
-                console.log('📚 DEBUG - All steps loaded:', learnStore.currentLesson?.allSteps);
             }
             // Luego cargar el step específico
-            console.log('🎯 DEBUG - Loading specific step:', stepId.value);
             await learnStore.fetchLessonStep(lessonId.value, stepId.value);
-            console.log('🎯 DEBUG - Step loaded:', learnStore.currentLesson?.currentStep);
         } catch (error) {
-            console.error('❌ DEBUG - Error in fetchData:', error);
+            // Error manejado por el store
         }
     }
 };
@@ -132,16 +123,6 @@ watch([lessonId, stepId], fetchData, { immediate: false });
 
 const lessonStep = computed(() => {
   const step = learnStore.currentLesson?.currentStep;
-  console.log('🔍 DEBUG - lessonStep computed:', {
-    step: step,
-    type: step?.type,
-    question: step?.question,
-    options: step?.options,
-    hasOptions: step?.options?.length > 0,
-    currentLesson: learnStore.currentLesson,
-    loading: learnStore.loading,
-    error: learnStore.error
-  });
   return step;
 });
 
@@ -157,14 +138,7 @@ const selectOption = (optionId) => {
 };
 
 const checkAnswer = async () => {
-  console.log('🔽 DEBUG - checkAnswer called:', {
-    isAnswered: isAnswered.value,
-    selectedAnswer: selectedAnswer.value,
-    isReviewMode: isReviewMode.value
-  });
-  
   if (isAnswered.value) { // Si ya se respondió, el botón es "Siguiente"
-    console.log('🔽 DEBUG - Button click: Already answered, calling goToNextStep');
     goToNextStep();
     return;
   }
@@ -172,12 +146,9 @@ const checkAnswer = async () => {
   if (!selectedAnswer.value) return;
 
   try {
-    console.log('🔽 DEBUG - Submitting answer:', selectedAnswer.value);
     const result = await learnStore.submitQuizAnswer(lessonId.value, stepId.value, selectedAnswer.value);
-    console.log('🔽 DEBUG - Quiz result received:', result);
     quizResult.value = result;
     isAnswered.value = true;
-    console.log('🔽 DEBUG - isAnswered set to true, button should now be "Continuar"');
     
     // Actualizar progreso de la habilidad (UI optimista)
     if (result.correct) {
@@ -186,20 +157,11 @@ const checkAnswer = async () => {
         learnStore.updateSkillProgress(currentSkillId, currentProgress);
     }
   } catch (error) {
-    console.error("Error al comprobar respuesta:", error);
     // Mostrar error al usuario si es necesario
   }
 };
 
 const goToNextStep = async () => {
-  console.log('🚀 DEBUG - goToNextStep called:', {
-    isReviewMode: isReviewMode.value,
-    lessonId: lessonId.value,
-    stepId: stepId.value,
-    isLastStep: lessonStep.value?.isLastStep,
-    wasCorrect: quizResult.value?.correct
-  });
-  
   const steps = learnStore.currentLesson?.allSteps || [];
   const isLastStep = lessonStep.value?.isLastStep || false;
   const wasCorrect = quizResult.value?.correct || false;
@@ -218,7 +180,6 @@ const goToNextStep = async () => {
   
   // Si estamos en modo repaso y fallamos, resetear estado para permitir retry
   if (result === 'retry') {
-    console.log('🔄 RETRY MODE - Resetting state for another attempt');
     setTimeout(() => {
       selectedAnswer.value = null;
       isAnswered.value = false;
@@ -241,23 +202,11 @@ const goToNextStep = async () => {
   padding: 15px 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center; /* Centramos el contenido */
   position: sticky;
   top: 0;
   z-index: 100;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.lesson-header .back-arrow,
-.lesson-header .close-button {
-  font-size: 26px;
-  color: #333333;
-  text-decoration: none;
-  padding: 5px;
-  background: none; border: none; cursor: pointer;
-}
-.lesson-header .close-button {
-  font-weight: bold;
 }
 
 .lesson-header h1 {
@@ -265,8 +214,7 @@ const goToNextStep = async () => {
   font-weight: bold;
   color: #111111;
   margin: 0;
-  text-align: center; /* El título se centrará entre los botones */
-  flex-grow: 1;
+  text-align: center;
 }
 
 .progress-bar-container {
@@ -348,6 +296,31 @@ const goToNextStep = async () => {
   bottom: 0;
   z-index: 90;
 }
+
+/* Estilo del botón para coincidir con el de login */
+.lesson-footer :deep(.btn-quiz) {
+  width: 100% !important;
+  padding: 15px !important;
+  border: none !important;
+  border-radius: 12px !important; /* Bordes más redondeados como en login */
+  font-size: 18px !important;
+  font-weight: bold !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #FF007F !important; /* Color fucsia igual que login */
+  color: white !important;
+}
+
+.lesson-footer :deep(.btn-quiz:hover:not(:disabled)) {
+  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+}
+
+.lesson-footer :deep(.btn-quiz:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #FF007F !important; /* Mantener color fucsia even cuando disabled */
+}
+
 /* BaseButton usa variant finko-check-answer */
 .loading-message, .error-message-centered {
   text-align: center;

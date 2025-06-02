@@ -258,7 +258,7 @@ const checkAnswers = async () => {
     // await learnStore.submitDragDropAnswer(lessonId, stepId, userAnswers);
     
   } catch (error) {
-    console.error('Error al verificar respuestas:', error);
+    // Error manejado por el store
   } finally {
     loading.value = false;
   }

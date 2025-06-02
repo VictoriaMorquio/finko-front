@@ -1,8 +1,7 @@
 <template>
   <div class="true-false-page-container">
     <PageHeader
-      :show-back="true"
-      :back-route="{ name: 'SkillLessons', params: { skillId: getSkillIdFromLessonId(lessonId) } }"
+      :show-back="false"
       :show-logo="true"
     />
 
@@ -44,7 +43,6 @@
               @click="submitAnswer(false)"
               :disabled="loading"
             >
-              <span class="btn-icon">❌</span>
               <span class="btn-text">Falso</span>
             </button>
             
@@ -53,7 +51,6 @@
               @click="submitAnswer(true)"
               :disabled="loading"
             >
-              <span class="btn-icon">✅</span>
               <span class="btn-text">Verdadero</span>
             </button>
           </div>
@@ -61,9 +58,6 @@
           <!-- Feedback -->
           <div class="feedback-section" v-if="answered">
             <div class="feedback-box" :class="{ 'correct': isCorrect, 'incorrect': !isCorrect }">
-              <div class="feedback-icon">
-                {{ isCorrect ? '🎉' : '😞' }}
-              </div>
               <div class="feedback-content">
                 <h3 class="feedback-title">
                   {{ isCorrect ? '¡Correcto!' : 'Incorrecto' }}
@@ -135,16 +129,6 @@ const submitAnswer = async (answer) => {
   loading.value = true;
   selectedAnswer.value = answer;
   
-  console.log('🔍 TRUE-FALSE DEBUG:', {
-    answer: answer,
-    answerType: typeof answer,
-    lessonId: lessonId,
-    stepId: stepId,
-    stepData: stepData.value,
-    statement: stepData.value?.statement,
-    feedbackStructure: stepData.value?.feedback
-  });
-  
   try {
     // Para true-false, enviamos un objeto específico
     const trueFalseData = {
@@ -154,25 +138,15 @@ const submitAnswer = async (answer) => {
       type: 'true-false' // Indicador para el backend
     };
     
-    console.log('🚀 TRUE-FALSE - Enviando data específica:', trueFalseData);
-    
     // Enviar al backend usando el store (igual que LessonQuizView)
     const result = await learnStore.submitQuizAnswer(lessonId, stepId, answer);
-    console.log('🔍 TRUE-FALSE RESULT from backend:', result);
     
     quizResult.value = result;
     isCorrect.value = result.correct;
     answered.value = true;
     
-    // Log adicional para debug
-    console.log('🎯 TRUE-FALSE Final evaluation:', {
-      userAnswer: answer,
-      backendSaysCorrect: result.correct,
-      expectedToBeCorrect: true // La afirmación es verdadera
-    });
-    
   } catch (error) {
-    console.error('Error al enviar respuesta:', error);
+    // Error manejado por el store
   } finally {
     loading.value = false;
   }
@@ -181,12 +155,6 @@ const submitAnswer = async (answer) => {
 const continueToNext = async () => {
   const steps = learnStore.currentLesson?.allSteps || [];
   const wasCorrect = isCorrect.value; // Usar el estado local de correcto/incorrecto
-  
-  console.log('🚀 DEBUG - TrueFalse continueToNext:', {
-    isReviewMode: isReviewMode.value,
-    wasCorrect: wasCorrect,
-    steps: steps.length
-  });
   
   // Usar handleQuizNavigation para incluir verificación de repasos
   const result = await handleQuizNavigation(
@@ -202,7 +170,6 @@ const continueToNext = async () => {
   
   // Si estamos en modo repaso y fallamos, resetear estado para permitir retry
   if (result === 'retry') {
-    console.log('🔄 RETRY MODE - TrueFalse resetting state for another attempt');
     setTimeout(() => {
       answered.value = false;
       isCorrect.value = false;
@@ -226,7 +193,7 @@ const getSkillIdFromLessonId = (lessonId) => {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #F75B06 0%, #FB305F 40%, #FB02B8 100%);
 }
 
 .true-false-main-content {
@@ -326,8 +293,9 @@ const getSkillIdFromLessonId = (lessonId) => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  min-height: 120px;
+  min-height: 80px;
 }
 
 .answer-btn:hover:not(:disabled) {
@@ -344,14 +312,42 @@ const getSkillIdFromLessonId = (lessonId) => {
   cursor: not-allowed;
 }
 
+.false-btn {
+  background: white;
+  border: 2px solid #ef4444;
+}
+
+.false-btn .btn-text {
+  color: #ef4444;
+  font-weight: bold;
+}
+
 .false-btn:hover:not(:disabled) {
   background: #fef2f2;
-  border: 2px solid #ef4444;
+  border: 2px solid #dc2626;
+}
+
+.false-btn:hover:not(:disabled) .btn-text {
+  color: #dc2626;
+}
+
+.true-btn {
+  background: white;
+  border: 2px solid #10b981;
+}
+
+.true-btn .btn-text {
+  color: #10b981;
+  font-weight: bold;
 }
 
 .true-btn:hover:not(:disabled) {
   background: #f0fdf4;
-  border: 2px solid #10b981;
+  border: 2px solid #059669;
+}
+
+.true-btn:hover:not(:disabled) .btn-text {
+  color: #059669;
 }
 
 .btn-icon {
@@ -361,7 +357,7 @@ const getSkillIdFromLessonId = (lessonId) => {
 .btn-text {
   font-size: 18px;
   font-weight: 600;
-  color: #333;
+  /* Color se define específicamente en .true-btn y .false-btn */
 }
 
 .feedback-section {
@@ -406,22 +402,25 @@ const getSkillIdFromLessonId = (lessonId) => {
 }
 
 .continue-btn {
-  background: #FF007F;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 16px 32px;
-  font-size: 16px;
-  font-weight: 600;
+  background: #FF007F !important;
+  color: white !important;
+  border: 2px solid white !important;
+  border-radius: 12px !important;
+  padding: 15px 32px !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: auto;
+  min-width: 200px;
 }
 
 .continue-btn:hover {
-  background: #e6006f;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 0, 127, 0.4);
+  background: #E60072 !important;
+  transform: none;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  border: 2px solid white !important;
 }
 
 .loading-message, .error-message-centered {
