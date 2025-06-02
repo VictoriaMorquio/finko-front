@@ -1,7 +1,7 @@
 <template>
   <div class="unit-card" @click="$emit('selected', unit.id)">
     <div class="unit-image-container" :style="{ backgroundColor: unit.bgColor || '#FBEAE3' }">
-      <img :src="unit.image" :alt="unit.title" class="unit-image">
+      <img :src="getFullImageUrl(unit.image)" :alt="unit.title" class="unit-image" @error="handleImageError">
     </div>
     <h3 class="unit-title" v-html="unit.title.replace('<br>', '<br/>')"></h3>
     <p class="unit-description">{{ unit.description }}</p>
@@ -9,6 +9,8 @@
 </template>
 
 <script setup>
+import { getImageUrl } from '@/utils/imageUtils.js';
+
 defineProps({
   unit: {
     type: Object,
@@ -17,6 +19,16 @@ defineProps({
   }
 });
 defineEmits(['selected']);
+
+const getFullImageUrl = (imagePath) => {
+  return getImageUrl(imagePath);
+};
+
+const handleImageError = (event) => {
+  console.warn('Error loading unit image:', event.target.src);
+  // Usar imagen placeholder local si falla la del backend
+  event.target.src = '/images/placeholder-unit.jpg';
+};
 </script>
 
 <style scoped>

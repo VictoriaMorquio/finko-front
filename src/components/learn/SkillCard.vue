@@ -1,7 +1,7 @@
 <template>
   <div class="skill-card" @click="$emit('selected', skill.id)">
     <div class="skill-image-container">
-      <img :src="skill.image" :alt="skill.title" class="skill-image">
+      <img :src="getFullImageUrl(skill.image)" :alt="skill.title" class="skill-image" @error="handleImageError">
     </div>
     <h3 class="skill-title" v-html="skill.title.replace('<br>', '<br/>')"></h3>
     <div class="skill-progress-track">
@@ -11,6 +11,8 @@
 </template>
 
 <script setup>
+import { getImageUrl } from '@/utils/imageUtils.js';
+
 defineProps({
   skill: {
     type: Object,
@@ -19,6 +21,16 @@ defineProps({
   }
 });
 defineEmits(['selected']);
+
+const getFullImageUrl = (imagePath) => {
+  return getImageUrl(imagePath);
+};
+
+const handleImageError = (event) => {
+  console.warn('Error loading skill image:', event.target.src);
+  // Usar imagen placeholder local si falla la del backend
+  event.target.src = '/images/placeholder-skill.jpg';
+};
 </script>
 
 <style scoped>
@@ -42,9 +54,9 @@ defineEmits(['selected']);
 }
 
 .skill-card .skill-image {
-  max-width: 75%;
-  max-height: 75%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .skill-card .skill-title {

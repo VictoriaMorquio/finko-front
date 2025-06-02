@@ -20,6 +20,15 @@ export const API_CONFIG = {
       UPLOAD_PROFILE_PIC: '/auth/me/profile-pic',
       DELETE_ACCOUNT: '/auth/me/account'
     },
+    LEARN: {
+      DASHBOARD: '/learn/dashboard',
+      UNIT_SKILLS: '/learn/units/{unitId}/skills',
+      // Endpoints en desarrollo (usando mock por ahora)
+      LESSON_INTRO: '/learn/lessons/{lessonId}/intro',
+      LESSON_STEP: '/learn/lessons/{lessonId}/steps/{stepId}',
+      LEVEL_COMPLETED: '/learn/levels/{levelId}/completed',
+      QUIZ_SUBMIT: '/learn/quiz/submit'
+    },
     SUPPORT: {
       CONTACT: '/support/contact',
       CONTACT_INFO: '/support/contact-info'
