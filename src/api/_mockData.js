@@ -220,7 +220,7 @@ export const mockLevelCompletedData = {
     'unit1': { // ID del nivel/unidad completado
         id: 'unit1',
         pageTitle: "Nivel Completado", // Para PageHeader
-        headerImage: "/images/nivelCompletado.png",
+        headerImage: "/images/level-completed/celebration.png",
         congratsTitle: "¡Enhorabuena!",
         levelName: "Nivel 1: Fundamentos de Finanzas",
         description: "¡Has completado el primer nivel! Ya tienes los conocimientos básicos para comenzar tu aventura financiera.",
@@ -229,8 +229,33 @@ export const mockLevelCompletedData = {
             text: "100 monedas ganadas"
         },
         nextRouteName: 'LearnDashboard' // O la siguiente unidad/lección
+    },
+    'u1s1l1': {
+        id: 'u1s1l1',
+        pageTitle: "Nivel Completado",
+        headerImage: "/images/level-completed/celebration.png",
+        congratsTitle: "¡Excelente!",
+        levelName: "Lección 1: Funciones del Dinero",
+        description: "¡Felicitaciones! Has aprendido las funciones básicas del dinero y estás listo para el siguiente desafío.",
+        rewards: {
+            coins: 50,
+            text: "50 monedas ganadas"
+        },
+        nextRouteName: 'SkillLessons'
+    },
+    'u1s1l2': {
+        id: 'u1s1l2',
+        pageTitle: "Nivel Completado",
+        headerImage: "/images/level-completed/celebration.png",
+        congratsTitle: "¡Fantástico!",
+        levelName: "Lección 2: Historia del Dinero",
+        description: "¡Increíble! Has dominado la historia del dinero y su evolución a través del tiempo.",
+        rewards: {
+            coins: 60,
+            text: "60 monedas ganadas"
+        },
+        nextRouteName: 'SkillLessons'
     }
-    // ... más datos de niveles completados
 };
 
 

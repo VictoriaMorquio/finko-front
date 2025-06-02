@@ -88,14 +88,24 @@ export const useLearnStore = defineStore('learn', {
         console.log('🏪 STORE - stepData keys:', Object.keys(stepData));
         console.log('🏪 STORE - Full stepData structure:', JSON.stringify(stepData, null, 2));
         
+        // Preservar allSteps si ya existe y es para la misma lección
+        const existingLesson = this.currentLesson && this.currentLesson.id === lessonId ? this.currentLesson : null;
+        
         this.currentLesson = {
-            ...(this.currentLesson && this.currentLesson.id === lessonId ? this.currentLesson : { id: lessonId, title: 'Lección ' + lessonId }),
+            id: lessonId,
+            title: existingLesson?.title || 'Lección ' + lessonId,
+            // Preservar allSteps si existe
+            ...(existingLesson?.allSteps && { allSteps: existingLesson.allSteps }),
+            // Preservar otras propiedades existentes si las hay
+            ...existingLesson,
+            // Actualizar con los datos del step actual
             currentStep: stepData,
             lessonId: lessonId,
             stepId: stepId
         };
         
         console.log('🏪 STORE - currentLesson updated:', this.currentLesson);
+        console.log('🏪 STORE - allSteps preserved:', this.currentLesson.allSteps?.length || 'No allSteps');
       } catch (err) {
         this.error = err.message || `Fallo al cargar el paso ${stepId} de la lección ${lessonId}.`;
         console.error('🏪 STORE - Error in fetchLessonStep:', err);
@@ -139,13 +149,16 @@ export const useLearnStore = defineStore('learn', {
         }
     },
     async fetchLevelCompletedData(levelId) {
+        console.log('🏪 STORE - fetchLevelCompletedData called with levelId:', levelId);
         this.loading = true;
         this.error = null;
         this.currentLesson = null;
         try {
             const data = await learnService.getLevelCompletedData(levelId);
+            console.log('🏪 STORE - Level completed data received:', data);
             this.currentLesson = data;
         } catch (err) {
+            console.error('🏪 STORE - Error in fetchLevelCompletedData:', err);
             this.error = err.message || `Fallo al cargar datos de nivel ${levelId} completado.`;
         } finally {
             this.loading = false;

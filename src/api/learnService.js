@@ -1,6 +1,7 @@
 import httpClient from './httpClient';
 import { API_CONFIG } from '../config/api.js';
 import { mockLessonSteps, mockLevelCompletedData } from './_mockData.js';
+import { processImageUrls } from '@/utils/imageUtils.js';
 
 const USE_MOCK_DATA = API_CONFIG.USE_MOCK_DATA;
 const MOCK_DELAY = 400;
@@ -9,37 +10,37 @@ const MOCK_DELAY = 400;
 const realLearnService = {
   async getLearnDashboard() {
     const response = await httpClient.get('/learn/dashboard');
-    return response;
+    return processImageUrls(response);
   },
 
   async getUnitSkills(unitId) {
     const response = await httpClient.get(`/learn/units/${unitId}/skills`);
-    return response;
+    return processImageUrls(response);
   },
 
   async getSkillLessons(skillId) {
     const response = await httpClient.get(`/learn/skills/${skillId}/lessons`);
-    return response;
+    return processImageUrls(response);
   },
 
   async getLessonIntro(lessonId) {
     const response = await httpClient.get(`/learn/lessons/${lessonId}/intro`);
-    return response;
+    return processImageUrls(response);
   },
 
   async getLessonStep(lessonId, stepId) {
     const response = await httpClient.get(`/learn/lessons/${lessonId}/steps/${stepId}`);
-    return response;
+    return processImageUrls(response);
   },
 
   async getLessonSteps(lessonId) {
     const response = await httpClient.get(`/learn/lessons/${lessonId}/steps`);
-    return response;
+    return processImageUrls(response);
   },
 
   async getLevelCompletedData(levelId) {
     const response = await httpClient.get(`/learn/levels/${levelId}/completed`);
-    return response;
+    return processImageUrls(response);
   },
 
   async submitQuiz(quizData) {
@@ -62,17 +63,17 @@ const realLearnService = {
   // Nuevos endpoints para sistema de repasos
   async getReviewStatus(lessonId) {
     const response = await httpClient.get(`/learn/lessons/${lessonId}/review/status`);
-    return response;
+    return processImageUrls(response);
   },
 
   async getNextReviewStep(lessonId) {
     const response = await httpClient.get(`/learn/lessons/${lessonId}/review/next`);
-    return response;
+    return processImageUrls(response);
   },
 
   async resetReviewQueue(lessonId) {
     const response = await httpClient.post(`/learn/lessons/${lessonId}/review/reset`);
-    return response;
+    return processImageUrls(response);
   }
 };
 
@@ -82,7 +83,7 @@ const mockLearnService = {
     // Simulamos delay de red
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    return {
+    const mockData = {
       user: {
         name: "Ana García",
         level: 12,
@@ -111,6 +112,8 @@ const mockLearnService = {
         }
       ]
     };
+    
+    return processImageUrls(mockData);
   },
 
   async getLessonIntro(lessonId) {
@@ -121,7 +124,7 @@ const mockLearnService = {
       throw new Error(`Lección ${lessonId} no encontrada`);
     }
 
-    return {
+    const mockData = {
       id: lessonData.id,
       title: lessonData.title,
       description: lessonData.description,
@@ -132,6 +135,8 @@ const mockLearnService = {
       coinsReward: 50,
       xpReward: 100
     };
+    
+    return processImageUrls(mockData);
   },
 
   async getLessonStep(lessonId, stepId) {
@@ -150,7 +155,7 @@ const mockLearnService = {
     const currentStepNumber = parseInt(stepId.split('s').pop()) || 1;
     const isLastStep = currentStepNumber >= lessonData.totalSteps;
     
-    return {
+    const mockData = {
       ...step,
       totalSteps: lessonData.totalSteps,
       currentStepNumber,
@@ -158,6 +163,8 @@ const mockLearnService = {
       allSteps: lessonData.steps, // Para navegación inteligente
       progressPercentage: (currentStepNumber / lessonData.totalSteps) * 100
     };
+    
+    return processImageUrls(mockData);
   },
 
   getUnitSkills: (unitId) => {
@@ -178,7 +185,7 @@ const mockLearnService = {
         ];
         const unitSkills = mockUnitSkills.find(us => us.unitId === unitId);
         if (unitSkills) {
-          resolve(unitSkills);
+          resolve(processImageUrls(unitSkills));
         } else {
           reject({ message: `Habilidades para la unidad ${unitId} no encontradas.` });
         }
@@ -213,7 +220,7 @@ const mockLearnService = {
 
     const skillLessons = mockSkillLessons[skillId];
     if (skillLessons) {
-      return skillLessons;
+      return processImageUrls(skillLessons);
     } else {
       throw new Error(`Lecciones para skill ${skillId} no encontradas.`);
     }
@@ -224,7 +231,7 @@ const mockLearnService = {
       setTimeout(() => {
         const levelData = mockLevelCompletedData[levelId];
         if (levelData) {
-          resolve(levelData);
+          resolve(processImageUrls(levelData));
         } else {
           reject({ message: `Datos de nivel completado para ${levelId} no encontrados.` });
         }

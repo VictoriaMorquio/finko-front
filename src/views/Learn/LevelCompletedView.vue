@@ -1,39 +1,64 @@
 <template>
   <div class="level-complete-page" v-if="completionData">
     <header class="completion-header">
-      <router-link :to="{name: 'LearnDashboard'}" class="close-btn" aria-label="Cerrar">×</router-link>
+      <router-link :to="{name: 'LearnDashboard'}" class="close-btn" aria-label="Cerrar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </router-link>
       <h1>{{ completionData.pageTitle || 'Nivel Completado' }}</h1>
     </header>
 
-    <section class="completion-hero">
-      <img :src="completionData.headerImage || '/images/nivelCompletado.png'" alt="¡Nivel completado!" class="celebration-image">
-    </section>
+    <main class="completion-main">
+      <div class="completion-card">
+        <!-- Imagen de celebración -->
+        <div class="celebration-container">
+          <div class="celebration-glow"></div>
+          <img :src="completionData.headerImage || '/images/level-completed/celebration.png'" 
+               alt="¡Nivel completado!" 
+               class="celebration-image">
+        </div>
 
-    <main class="completion-content">
-      <h2 class="congrats-title">{{ completionData.congratsTitle }}</h2>
-      <h3 class="level-name">{{ completionData.levelName }}</h3>
-      <p class="level-description">{{ completionData.description }}</p>
-      <div class="rewards-info" v-if="completionData.rewards">
-        <span class="coin-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="#D4AF37"/><path d="M12 6C11.54 6 11.08 6.07 10.66 6.2C10.56 6.23 10.47 6.26 10.38 6.3C9.04 6.89 8 8.17 8 9.75C8 11.67 9.48 13.26 11.33 13.47C11.55 13.49 11.77 13.5 12 13.5C12.46 13.5 12.92 13.43 13.34 13.3C13.44 13.27 13.53 13.24 13.62 13.2C14.96 12.61 16 11.33 16 9.75C16 7.83 14.52 6.24 12.67 6.03C12.45 6.01 12.23 6 12 6ZM12 11.5C11.17 11.5 10.5 10.83 10.5 10C10.5 9.17 11.17 8.5 12 8.5C12.83 8.5 13.5 9.17 13.5 10C13.5 10.83 12.83 11.5 12 11.5Z" fill="#E4C462"/><path d="M12 7.5C11.72 7.5 11.5 7.72 11.5 8V10.5H10C9.72 10.5 9.5 10.72 9.5 11C9.5 11.28 9.72 11.5 10 11.5H11.5V12C11.5 12.28 11.72 12.5 12 12.5C12.28 12.5 12.5 12.28 12.5 12V11.5H14C14.28 11.5 14.5 11.28 14.5 11C14.5 10.72 14.28 10.5 14 10.5H12.5V8C12.5 7.72 12.28 7.5 12 7.5Z" fill="#D4AF37"/></svg>
-        </span>
-        <span class="rewards-text">{{ completionData.rewards.text }}</span>
+        <!-- Contenido principal -->
+        <div class="completion-content">
+          <h2 class="congrats-title">{{ completionData.congratsTitle }}</h2>
+          <h3 class="level-name">{{ completionData.levelName }}</h3>
+          <p class="level-description">{{ completionData.description }}</p>
+
+          <!-- Recompensas con diseño mejorado -->
+          <div class="rewards-section" v-if="completionData.rewards">
+            <div class="rewards-card">
+              <div class="coin-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" fill="#FFD700"/>
+                  <circle cx="12" cy="12" r="7" fill="#FFA500"/>
+                  <text x="12" y="16" text-anchor="middle" font-size="12" font-weight="bold" fill="#8B4513">$</text>
+                </svg>
+              </div>
+              <span class="rewards-text">{{ completionData.rewards.text }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de continuar -->
+        <div class="action-section">
+          <BaseButton 
+            variant="primary" 
+            size="large"
+            @click="continueLearning" 
+            full-width
+            class="btn-continuar-modern"
+          >
+            Continuar
+          </BaseButton>
+        </div>
       </div>
     </main>
-
-    <footer class="completion-footer">
-      <BaseButton 
-        variant="primary" 
-        size="large"
-        @click="continueLearning" 
-        full-width
-        class="btn-continuar"
-      >
-        Continuar
-      </BaseButton>
-    </footer>
   </div>
-  <div v-else-if="learnStore.loading" class="loading-message">Cargando...</div>
+  <div v-else-if="learnStore.loading" class="loading-message">
+    <div class="loading-spinner"></div>
+    <p>Cargando...</p>
+  </div>
   <div v-else-if="learnStore.error" class="error-message-centered">{{ learnStore.error }}</div>
 </template>
 
@@ -51,28 +76,39 @@ const authStore = useAuthStore();
 const levelId = route.params.levelId;
 
 onMounted(() => {
+  console.log('🔴 DEBUG - LevelCompletedView onMounted called with levelId:', levelId);
   learnStore.fetchLevelCompletedData(levelId);
 });
 
-const completionData = computed(() => learnStore.currentLesson); // Reutilizamos currentLesson
+const completionData = computed(() => {
+  console.log('🔍 DEBUG - completionData:', learnStore.currentLesson);
+  console.log('🔍 DEBUG - headerImage:', learnStore.currentLesson?.headerImage);
+  return learnStore.currentLesson;
+}); // Reutilizamos currentLesson
 
 const continueLearning = async () => {
-  // Actualizar monedas del usuario (UI Optimista)
+  // Actualizar monedas del usuario (UI Optimista) - Solo si hay datos válidos
   if (authStore.currentUser && completionData.value?.rewards?.coins) {
-      const currentUserData = JSON.parse(JSON.stringify(authStore.currentUser));
-      currentUserData.stats.coins += completionData.value.rewards.coins;
-      currentUserData.stats.levelsCompleted +=1;
-      
-      // Actualizar el store local inmediatamente (UI optimista)
-      authStore.user = currentUserData;
-      localStorage.setItem('finkoUser', JSON.stringify(currentUserData));
-      
-      // También actualizar desde el servidor en background para mantener sincronización
       try {
-        await authStore.refreshUserData();
+        const currentUserData = JSON.parse(JSON.stringify(authStore.currentUser));
+        currentUserData.stats.coins += completionData.value.rewards.coins;
+        currentUserData.stats.levelsCompleted += 1;
+        
+        // Actualizar el store local inmediatamente (UI optimista)
+        authStore.user = currentUserData;
+        localStorage.setItem('finkoUser', JSON.stringify(currentUserData));
+        
+        // También actualizar desde el servidor en background para mantener sincronización
+        try {
+          await authStore.refreshUserData();
+        } catch (err) {
+          console.warn('⚠️ Error actualizando datos de usuario desde servidor, usando datos locales');
+        }
       } catch (err) {
-        // En caso de error de sincronización, la actualización optimista ya se aplicó
+        console.warn('⚠️ Error actualizando monedas de usuario:', err);
       }
+  } else {
+    console.log('⚠️ No se pudo actualizar monedas: datos de usuario o recompensas no disponibles');
   }
 
   // 🔒 VERIFICACIÓN ESTRICTA: Solo actualizar si la lección está REALMENTE completada
@@ -120,22 +156,24 @@ const getSkillIdFromLevelId = (levelId) => {
 </script>
 
 <style scoped>
-/* Estilos de nivel-completado.html */
 .level-complete-page {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #FFFFFF; /* Asegura fondo blanco si no es el default */
+  background: linear-gradient(135deg, #FFB74D 0%, #FF8A65 30%, #FF007F 70%, #F06292 100%);
+  padding: 0;
 }
 
 .completion-header {
-  background-color: #F8F9FA;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   padding: 15px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  border-bottom: 1px solid #E9ECEF;
+  border-bottom: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .completion-header .close-btn {
@@ -143,142 +181,284 @@ const getSkillIdFromLevelId = (levelId) => {
   left: 20px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 28px;
   color: #495057;
   text-decoration: none;
-  padding: 5px;
-  background: none; border: none; cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .completion-header .close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
   color: #000000;
 }
 
 .completion-header h1 {
-  font-size: 18px;
-  font-weight: 500;
-  color: #343A40;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
   margin: 0;
 }
 
-.completion-hero {
-  background-color: #F8F9FA;
-  padding: 30px 20px;
+.completion-main {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.completion-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  padding: 40px 30px;
+  max-width: 420px;
+  width: 100%;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.completion-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FFB74D, #FF8A65, #FF007F);
+}
+
+.celebration-container {
+  position: relative;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.celebration-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120%;
+  height: 120%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 0, 127, 0.2) 0%, rgba(255, 0, 127, 0.05) 50%, transparent 70%);
+  pointer-events: none;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.8;
+  }
 }
 
 .celebration-image {
-  max-width: 200px;
-  width: 60%;
+  max-width: 180px;
+  width: 100%;
   height: auto;
+  border-radius: 16px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .completion-content {
-  padding: 30px 25px;
-  text-align: center;
-  flex-grow: 1;
+  margin-bottom: 30px;
 }
 
-.completion-content .congrats-title {
-  font-size: 30px;
-  font-weight: bold;
-  color: #111111;
-  margin-bottom: 15px;
+.congrats-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #FF007F, #FF8A80);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.completion-content .level-name {
-  font-size: 20px;
-  font-weight: bold;
-  color: #212121;
-  margin-bottom: 10px;
+.level-name {
+  font-size: 22px;
+  font-weight: 600;
+  color: #4a5568;
+  margin-bottom: 24px;
+  line-height: 1.3;
 }
 
-.completion-content .level-description {
+.level-description {
   font-size: 16px;
-  color: #444444;
-  margin-bottom: 25px;
-  max-width: 400px;
+  color: #718096;
+  margin-bottom: 0;
+  line-height: 1.6;
+  max-width: 350px;
   margin-left: auto;
   margin-right: auto;
 }
 
-.rewards-info {
-  display: inline-flex; /* Para que se ajuste al contenido */
+.rewards-section {
+  margin-bottom: 30px;
+}
+
+.rewards-card {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  background-color: #FFF0F5;
-  padding: 12px 20px;
-  border-radius: 10px;
-  max-width: 300px;
-  margin: 0 auto 30px auto;
+  gap: 12px;
+  background: linear-gradient(135deg, #FFF5E6 0%, #FFE4B5 100%);
+  padding: 16px 24px;
+  border-radius: 16px;
+  border: 2px solid #FFD700;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.rewards-info .coin-icon {
-  width: 24px;
-  height: 24px;
-}
-.rewards-info .coin-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
+.rewards-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
 }
 
-.rewards-info .rewards-text {
+.coin-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rewards-text {
   font-size: 16px;
-  color: #5C3A47;
-  font-weight: 500;
+  color: #8B4513;
+  font-weight: 600;
 }
 
-.completion-footer {
-  background-color: #FFFFFF;
-  padding: 20px 25px 40px;
+.action-section {
   text-align: center;
-  border-top: 1px solid #F0F0F0;
-  position: sticky;
-  bottom: 0;
-  z-index: 90;
 }
 
-/* Estilo del botón para coincidir con el de login */
-.completion-footer :deep(.btn-continuar) {
+.btn-continuar-modern {
   width: 100% !important;
-  padding: 15px !important;
+  padding: 16px 24px !important;
   border: none !important;
-  border-radius: 12px !important; /* Bordes más redondeados como en login */
+  border-radius: 16px !important;
   font-size: 18px !important;
-  font-weight: bold !important;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  background-color: #FF007F !important; /* Color fucsia igual que login */
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  background: linear-gradient(135deg, #FF007F 0%, #e91e63 100%) !important;
   color: white !important;
+  box-shadow: 0 6px 20px rgba(255, 0, 127, 0.4) !important;
+  text-transform: none !important;
 }
 
-.completion-footer :deep(.btn-continuar:hover:not(:disabled)) {
-  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+.btn-continuar-modern:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(255, 0, 127, 0.5) !important;
 }
 
-.completion-footer :deep(.btn-continuar:disabled) {
-  opacity: 0.6;
-  cursor: not-allowed;
+.btn-continuar-modern:active {
+  transform: translateY(0) !important;
 }
 
-/* BaseButton usa variant finko-continue-lesson (o similar) */
-.loading-message, .error-message-centered {
+.btn-continuar-modern:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.loading-message {
   text-align: center;
   padding: 40px 20px;
   font-size: 16px;
-  color: #555;
-  height: 100vh; display: flex; justify-content: center; align-items: center;
+  color: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .error-message-centered {
-    color: red;
+  color: #fff;
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .completion-main {
+    padding: 15px;
+  }
+  
+  .completion-card {
+    padding: 30px 20px;
+    border-radius: 20px;
+  }
+  
+  .completion-header h1 { 
+    font-size: 18px; 
+  }
+  
+  .congrats-title { 
+    font-size: 28px; 
+  }
+  
+  .level-name { 
+    font-size: 20px; 
+  }
+  
+  .level-description { 
+    font-size: 15px; 
+  }
+  
+  .rewards-text { 
+    font-size: 15px; 
+  }
+  
+  .celebration-image {
+    max-width: 150px;
+  }
 }
 
 @media (max-width: 360px) {
-  .completion-header h1 { font-size: 17px; }
-  .completion-content .congrats-title { font-size: 28px; }
-  .completion-content .level-name { font-size: 18px; }
-  .completion-content .level-description { font-size: 15px; }
-  .rewards-info .rewards-text { font-size: 15px; }
+  .completion-card {
+    margin: 10px;
+    padding: 25px 15px;
+  }
+  
+  .congrats-title { 
+    font-size: 26px; 
+  }
+  
+  .level-name { 
+    font-size: 18px; 
+  }
 }
 </style> 
