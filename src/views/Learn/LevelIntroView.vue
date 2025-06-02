@@ -52,8 +52,31 @@ const startLesson = async () => {
     // No es crítico que falle el reset, continuamos de todas formas
   }
   
-  // Siempre navegar al primer step, incluso si el reset falla
-  navigateToFirstStep(router, lessonIntro.value);
+  try {
+    // Obtener todos los steps de la lección
+    const lessonData = await learnStore.fetchLessonSteps(levelId);
+    console.log('✅ Datos de lección obtenidos:', {
+      lessonId: levelId,
+      totalSteps: lessonData?.steps?.length || lessonData?.allSteps?.length || 0,
+      steps: (lessonData?.steps || lessonData?.allSteps || []).map(s => ({
+        id: s.id,
+        type: s.type,
+        stepNumber: s.stepNumber || 'N/A'
+      }))
+    });
+    
+    // Navegar al primer step con los datos completos
+    navigateToFirstStep(router, lessonData, levelId);
+  } catch (error) {
+    console.error('Error al obtener steps de la lección:', error);
+    // Fallback: intentar navegar con los datos de intro actuales
+    console.log('🔄 Usando fallback con datos de intro:', {
+      lessonIntro: lessonIntro.value,
+      hasAllSteps: !!lessonIntro.value?.allSteps,
+      stepsCount: lessonIntro.value?.allSteps?.length || 0
+    });
+    navigateToFirstStep(router, lessonIntro.value, levelId);
+  }
 };
 
 // Función heurística para intentar obtener el unitId desde el levelId (skillId)

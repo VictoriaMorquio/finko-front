@@ -27,7 +27,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useLearnStore } from '@/stores/learn';
 import PageHeader from '@/components/common/PageHeader.vue';
@@ -40,23 +40,44 @@ const skillId = route.params.skillId;
 
 onMounted(() => {
   learnStore.fetchSkillLessons(skillId);
+  
+  // 🎉 Detectar si se regresa de una lección recién completada
+  if (route.query.refreshed === 'true') {
+    console.log('🎯 Usuario regresó tras completar lección - datos actualizados');
+    // Limpiar el query parameter
+    router.replace({ name: 'SkillLessons', params: { skillId } });
+  }
 });
 
 const skillData = computed(() => learnStore.currentSkillLessons);
 
-// Procesar las lecciones para implementar el sistema progresivo
+// 🔄 Observar cambios en los datos para detectar actualizaciones
+watch(() => skillData.value, (newData, oldData) => {
+  if (newData && oldData && route.query.refreshed === 'true') {
+    console.log('✅ Datos de lecciones actualizados tras completación');
+  }
+}, { deep: true });
+
+// Procesar las lecciones para implementar el sistema progresivo CON VERIFICACIÓN ESTRICTA
 const processedLessons = computed(() => {
   if (!skillData.value || !skillData.value.lessons) return [];
   
   const lessons = [...skillData.value.lessons];
   let foundIncomplete = false;
   
+  console.log('🔒 Procesando lecciones con verificación estricta:', lessons.map(l => ({
+    id: l.id,
+    status: l.status,
+    progress: l.progress
+  })));
+  
   return lessons.map((lesson, index) => {
     // La primera lección siempre está disponible
     if (index === 0) {
+      const isCompleted = isLessonStrictlyCompleted(lesson);
       return {
         ...lesson,
-        status: lesson.status === 'completed' ? 'completed' : 'available'
+        status: isCompleted ? 'completed' : 'available'
       };
     }
     
@@ -68,23 +89,46 @@ const processedLessons = computed(() => {
       };
     }
     
-    // Verificar si la lección anterior está completada
+    // Verificar si la lección anterior está ESTRICTAMENTE completada
     const previousLesson = lessons[index - 1];
-    if (previousLesson.status === 'completed') {
-      // La lección anterior está completa, esta puede estar disponible
-      if (lesson.status === 'completed') {
+    const isPreviousCompleted = isLessonStrictlyCompleted(previousLesson);
+    
+    if (isPreviousCompleted) {
+      // ✅ Anterior completa = esta puede estar disponible
+      const isCurrentCompleted = isLessonStrictlyCompleted(lesson);
+      if (isCurrentCompleted) {
         return { ...lesson, status: 'completed' };
       } else {
         foundIncomplete = true;
         return { ...lesson, status: 'available' };
       }
     } else {
-      // La lección anterior no está completa, esta y las siguientes están bloqueadas
+      // ❌ Anterior incompleta = esta y siguientes bloqueadas
       foundIncomplete = true;
       return { ...lesson, status: 'locked' };
     }
   });
 });
+
+// 🔒 FUNCIÓN DE VERIFICACIÓN ESTRICTA
+const isLessonStrictlyCompleted = (lesson) => {
+  // Verificaciones múltiples para asegurar completación real:
+  const hasCompletedStatus = lesson.status === 'completed';
+  const hasFullProgress = lesson.progress === 100;
+  
+  // Solo considerar completada si AMBAS condiciones se cumplen
+  const isStrictlyCompleted = hasCompletedStatus && hasFullProgress;
+  
+  if (hasCompletedStatus !== hasFullProgress) {
+    console.warn(`⚠️ Inconsistencia detectada en lección ${lesson.id}:`, {
+      status: lesson.status,
+      progress: lesson.progress,
+      strictCheck: isStrictlyCompleted
+    });
+  }
+  
+  return isStrictlyCompleted;
+};
 
 const navigateToLesson = (lessonId) => {
   // Solo navegar si la lección no está bloqueada

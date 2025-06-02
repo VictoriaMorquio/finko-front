@@ -138,25 +138,43 @@ const selectOption = (optionId) => {
 };
 
 const checkAnswer = async () => {
+  console.log('🎯 QUIZ - checkAnswer iniciado:', {
+    lessonId: lessonId.value,
+    stepId: stepId.value,
+    isAnswered: isAnswered.value,
+    selectedAnswer: selectedAnswer.value
+  });
+
   if (isAnswered.value) { // Si ya se respondió, el botón es "Siguiente"
+    console.log('➡️ QUIZ - Ya respondido, navegando al siguiente step');
     goToNextStep();
     return;
   }
 
-  if (!selectedAnswer.value) return;
+  if (!selectedAnswer.value) {
+    console.log('⚠️ QUIZ - No hay respuesta seleccionada');
+    return;
+  }
 
   try {
+    console.log('📤 QUIZ - Enviando respuesta al backend...');
     const result = await learnStore.submitQuizAnswer(lessonId.value, stepId.value, selectedAnswer.value);
+    console.log('📥 QUIZ - Respuesta del backend:', result);
+    
     quizResult.value = result;
     isAnswered.value = true;
     
     // Actualizar progreso de la habilidad (UI optimista)
     if (result.correct) {
+        console.log('✅ QUIZ - Respuesta correcta, actualizando progreso');
         const currentSkillId = lessonId.value; // Asumiendo que lessonId es el skillId
         const currentProgress = lessonStep.value?.progressPercentage || 0;
         learnStore.updateSkillProgress(currentSkillId, currentProgress);
+    } else {
+        console.log('❌ QUIZ - Respuesta incorrecta');
     }
   } catch (error) {
+    console.error('💥 QUIZ - Error al enviar respuesta:', error);
     // Mostrar error al usuario si es necesario
   }
 };
@@ -165,6 +183,16 @@ const goToNextStep = async () => {
   const steps = learnStore.currentLesson?.allSteps || [];
   const isLastStep = lessonStep.value?.isLastStep || false;
   const wasCorrect = quizResult.value?.correct || false;
+  
+  console.log('🚀 QUIZ - goToNextStep iniciado:', {
+    lessonId: lessonId.value,
+    stepId: stepId.value,
+    totalSteps: steps.length,
+    isLastStep,
+    wasCorrect,
+    isReviewMode: isReviewMode.value,
+    allSteps: steps.map(s => ({ id: s.id, type: s.type }))
+  });
   
   // Usar la nueva función que maneja repasos automáticamente
   const result = await handleQuizNavigation(
@@ -178,8 +206,11 @@ const goToNextStep = async () => {
     wasCorrect
   );
   
+  console.log('📋 QUIZ - Resultado de handleQuizNavigation:', result);
+  
   // Si estamos en modo repaso y fallamos, resetear estado para permitir retry
   if (result === 'retry') {
+    console.log('🔄 QUIZ - Modo retry activado, reseteando estado');
     setTimeout(() => {
       selectedAnswer.value = null;
       isAnswered.value = false;

@@ -75,8 +75,47 @@ const continueLearning = async () => {
       }
   }
 
-  // Navegar al siguiente nivel/dashboard
-  router.push({ name: completionData.value?.nextRouteName || 'LearnDashboard' });
+  // 🔒 VERIFICACIÓN ESTRICTA: Solo actualizar si la lección está REALMENTE completada
+  try {
+    console.log('🔍 Verificando completación real de la lección:', levelId);
+    
+    // Obtener el skillId de la lección actual
+    const skillId = getSkillIdFromLevelId(levelId);
+    
+    // Refrescar los datos de las lecciones desde el servidor para verificar estado real
+    await learnStore.fetchSkillLessons(skillId);
+    
+    console.log('✅ Datos de lecciones actualizados tras completación');
+    
+    // Navegar de vuelta a la lista de lecciones de la skill para mostrar progreso actualizado
+    router.push({ 
+      name: 'SkillLessons', 
+      params: { skillId: skillId },
+      query: { refreshed: 'true' } // Indicar que se acaba de completar una lección
+    });
+    
+  } catch (error) {
+    console.error('❌ Error actualizando datos tras completación:', error);
+    // Fallback: navegar al dashboard si hay error
+    router.push({ name: 'LearnDashboard' });
+  }
+};
+
+// Función para extraer skillId desde levelId
+const getSkillIdFromLevelId = (levelId) => {
+  // Patrones: "u1s1l1" -> "u1s1" | "skill1-1" -> "skill1"
+  if (levelId) {
+    if (levelId.startsWith('skill') && levelId.includes('-')) {
+      return levelId.split('-')[0];
+    }
+    if (levelId.includes('l')) {
+      return levelId.split('l')[0]; // "u1s1l1" -> "u1s1"
+    }
+    if (levelId.match(/^u\d+s\d+$/)) {
+      return levelId; // Ya es skillId
+    }
+  }
+  return 'u1s1'; // Fallback
 };
 </script>
 
