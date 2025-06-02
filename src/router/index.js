@@ -10,6 +10,7 @@ import ForgotPasswordNewView from '@/views/Auth/ForgotPasswordNewView.vue'
 // Learn Views
 import LearnDashboardView from '@/views/Learn/LearnDashboardView.vue'
 import UnitSkillsView from '@/views/Learn/UnitSkillsView.vue'
+import SkillLessonsView from '@/views/Learn/SkillLessonsView.vue'
 import LevelIntroView from '@/views/Learn/LevelIntroView.vue'
 import LessonContentView from '@/views/Learn/LessonContentView.vue'
 import LessonQuizView from '@/views/Learn/LessonQuizView.vue'
@@ -69,6 +70,12 @@ const routes = [
     path: '/learn/unit/:unitId/skills',
     name: 'UnitSkills',
     component: UnitSkillsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/learn/skill/:skillId/lessons',
+    name: 'SkillLessons',
+    component: SkillLessonsView,
     meta: { requiresAuth: true }
   },
   {
