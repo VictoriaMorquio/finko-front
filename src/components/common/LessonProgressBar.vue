@@ -85,7 +85,7 @@ const progressPercentage = computed(() => {
 }
 
 .lesson-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
   color: #111;
   flex: 1;
@@ -96,7 +96,7 @@ const progressPercentage = computed(() => {
 .review-text {
   text-align: center;
   color: #FF6B35;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   margin: 8px 0 0 0;
   animation: fade-in 0.5s ease-in;
@@ -113,7 +113,7 @@ const progressPercentage = computed(() => {
   }
   
   .lesson-title {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .progress-text {

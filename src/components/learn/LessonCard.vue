@@ -87,7 +87,7 @@ const handleClick = () => {
 }
 
 .lesson-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   color: #111;
   margin: 0;
@@ -126,7 +126,7 @@ const handleClick = () => {
 }
 
 .lesson-description {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
   margin: 0 0 16px 0;
   line-height: 1.5;
@@ -174,11 +174,11 @@ const handleClick = () => {
   }
   
   .lesson-title {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   .lesson-description {
-    font-size: 13px;
+    font-size: 12px;
   }
   
   .lesson-rewards {

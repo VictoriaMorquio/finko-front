@@ -219,9 +219,10 @@ const getSkillIdFromLessonId = (lessonId) => {
 
 .statement-title {
   color: white;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .statement-box {
@@ -233,9 +234,10 @@ const getSkillIdFromLessonId = (lessonId) => {
 
 .statement-text {
   font-size: 17px;
-  color: #333;
-  line-height: 1.5;
+  line-height: 1.6;
+  color: white;
   margin: 0;
+  text-align: justify;
 }
 
 .answer-section {
@@ -297,7 +299,7 @@ const getSkillIdFromLessonId = (lessonId) => {
 }
 
 .answer-text {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -311,7 +313,7 @@ const getSkillIdFromLessonId = (lessonId) => {
   border-radius: 16px;
   padding: 18px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -382,7 +384,7 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .statement-title {
-    font-size: 18px;
+    font-size: 20px;
     margin-bottom: 16px;
   }
   
@@ -391,7 +393,7 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .statement-text {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   .answer-buttons {
@@ -409,12 +411,12 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .answer-text {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   .feedback-message {
     padding: 18px;
-    font-size: 14px;
+    font-size: 13px;
     margin-bottom: 16px;
   }
   
@@ -439,7 +441,7 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .statement-title {
-    font-size: 17px;
+    font-size: 18px;
     margin-bottom: 12px;
   }
   
@@ -448,7 +450,7 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .statement-text {
-    font-size: 15px;
+    font-size: 14px;
   }
   
   .answer-buttons {
@@ -466,12 +468,12 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .answer-text {
-    font-size: 15px;
+    font-size: 14px;
   }
   
   .feedback-message {
     padding: 16px;
-    font-size: 13px;
+    font-size: 12px;
     margin-bottom: 12px;
   }
   

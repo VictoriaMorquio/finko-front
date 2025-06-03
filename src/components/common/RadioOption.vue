@@ -38,7 +38,7 @@ const isChecked = computed(() => props.modelValue === props.value);
   background-color: #FFFFFF;
   border: 1.5px solid #E0E0E0; /* Borde gris claro */
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
@@ -93,7 +93,7 @@ const isChecked = computed(() => props.modelValue === props.value);
 
 @media (max-width: 360px) {
   .option-label {
-    font-size: 15px;
+    font-size: 14px;
     padding: 16px 18px;
   }
 }

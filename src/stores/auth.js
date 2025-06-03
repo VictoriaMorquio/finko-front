@@ -147,6 +147,9 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const userData = await authService.getCurrentUser()
+      console.log('🔍 FETCHUSER - Datos recibidos del backend:', userData)
+      console.log('🔍 FETCHUSER - ¿Tiene achievements?:', userData.achievements)
+      console.log('🔍 FETCHUSER - Keys del usuario:', Object.keys(userData))
       setUser(userData)
       return userData
     } catch (err) {
@@ -181,6 +184,8 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const userData = await authService.getCurrentUser()
+      console.log('🔄 REFRESH USER - Datos recibidos del backend:', userData)
+      console.log('🔄 REFRESH USER - ¿Tiene achievements?:', userData.achievements)
       setUser(userData)
       return userData
     } catch (err) {

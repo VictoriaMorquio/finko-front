@@ -113,14 +113,14 @@ const goToNextStep = async () => {
 }
 
 .lesson-main-content h1 {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: bold;
   color: #111111;
   margin-bottom: 15px;
 }
 
 .lesson-main-content p {
-  font-size: 17px;
+  font-size: 16px;
   color: #333333;
   margin-bottom: 30px;
   line-height: 1.6;
@@ -185,8 +185,8 @@ const goToNextStep = async () => {
 @media (max-width: 360px) {
   .simple-header { padding: 0 15px 10px; }
   .lesson-main-content { padding: 25px 20px 25px; }
-  .lesson-main-content h1 { font-size: 24px; }
-  .lesson-main-content p { font-size: 16px; }
+  .lesson-main-content h1 { font-size: 22px; }
+  .lesson-main-content p { font-size: 15px; }
   .lesson-action-footer { padding: 15px 20px 30px; }
 }
 </style> 

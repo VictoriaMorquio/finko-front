@@ -94,7 +94,14 @@ const authStore = useAuthStore();
 const loading = ref(false);
 const error = ref(null);
 
-const user = computed(() => authStore.currentUser);
+const user = computed(() => {
+  const userData = authStore.currentUser;
+  console.log('👤 PROFILE - User data:', userData);
+  console.log('🏆 PROFILE - User achievements:', userData?.achievements);
+  console.log('🏆 PROFILE - Achievements type:', typeof userData?.achievements);
+  console.log('🏆 PROFILE - Achievements length:', userData?.achievements?.length);
+  return userData;
+});
 
 // Watch para detectar cuando se navega al perfil
 watch(() => route.name, (newRouteName, oldRouteName) => {

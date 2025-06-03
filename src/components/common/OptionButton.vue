@@ -29,7 +29,7 @@ defineEmits(['selected']);
   color: #333333;
   border: 2px solid transparent; /* Borde transparente por defecto */
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 15px;
   text-align: left;
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
@@ -66,7 +66,7 @@ defineEmits(['selected']);
 
 @media (max-width: 360px) {
   .option-button {
-    font-size: 15px;
+    font-size: 14px;
     padding: 16px 18px;
   }
 }

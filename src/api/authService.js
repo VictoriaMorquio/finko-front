@@ -155,7 +155,11 @@ const realAuth = {
   },
 
   async getCurrentUser() {
-    return await httpClient.get('/auth/me');
+    console.log('🌐 REAL AUTH - Llamando a /auth/me');
+    const response = await httpClient.get('/auth/me');
+    console.log('🌐 REAL AUTH - Respuesta de /auth/me:', response);
+    console.log('🌐 REAL AUTH - ¿Tiene achievements en response?:', response.achievements);
+    return response;
   },
 
   async logout() {

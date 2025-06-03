@@ -236,7 +236,7 @@ const goToNextStep = async () => {
 }
 
 .lesson-content h2 {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
   color: #111111;
   margin-bottom: 30px;
@@ -255,6 +255,8 @@ const goToNextStep = async () => {
     margin-top: 20px;
     padding: 10px;
     border-radius: 8px;
+    font-size: 15px;
+    text-align: center;
     font-weight: 500;
 }
 .feedback-message.correct {
@@ -315,6 +317,6 @@ const goToNextStep = async () => {
 }
 
 @media (max-width: 360px) {
-  .lesson-content h2 { font-size: 22px; }
+  .lesson-content h2 { font-size: 20px; }
 }
 </style> 

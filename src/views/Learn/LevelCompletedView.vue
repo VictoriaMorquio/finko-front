@@ -300,7 +300,7 @@ const getSkillIdFromLevelId = (levelId) => {
 .level-description {
   font-size: 16px;
   color: #718096;
-  margin-bottom: 0;
+  margin-bottom: 50px;
   line-height: 1.6;
   max-width: 350px;
   margin-left: auto;
@@ -309,6 +309,7 @@ const getSkillIdFromLevelId = (levelId) => {
 
 .rewards-section {
   margin-bottom: 30px;
+  margin-top: 35px;
 }
 
 .rewards-card {

@@ -336,20 +336,20 @@ const getSkillIdFromLessonId = (lessonId) => {
 
 .question-title {
   color: white;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
 .instruction-text {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 16px;
+  font-size: 15px;
   margin: 0;
 }
 
 .section-title {
   color: white;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   margin-bottom: 16px;
   text-align: center;
@@ -627,11 +627,11 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .question-title {
-    font-size: 20px;
+    font-size: 19px;
   }
   
   .instruction-text {
-    font-size: 14px;
+    font-size: 13px;
   }
   
   .drop-zones {
@@ -662,7 +662,7 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .feedback-title {
-    font-size: 20px;
+    font-size: 19px;
   }
 }
 </style> 
