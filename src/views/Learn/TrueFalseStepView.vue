@@ -421,7 +421,7 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .continue-footer {
-    padding: 16px 0;
+    padding: 16px 20px;
   }
   
   .btn-continue {
@@ -478,7 +478,7 @@ const getSkillIdFromLessonId = (lessonId) => {
   }
   
   .continue-footer {
-    padding: 12px 0;
+    padding: 12px 20px;
   }
   
   .btn-continue {
