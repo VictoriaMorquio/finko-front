@@ -235,7 +235,7 @@ const getSkillIdFromLessonId = (lessonId) => {
 .statement-text {
   font-size: 17px;
   line-height: 1.6;
-  color: white;
+  color: #333;
   margin: 0;
   text-align: justify;
 }

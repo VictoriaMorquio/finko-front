@@ -346,10 +346,12 @@ const getSkillIdFromLevelId = (levelId) => {
 
 .action-section {
   text-align: center;
+  padding: 0 20px;
 }
 
 .btn-continuar-modern {
-  width: 100% !important;
+  width: calc(100% - 40px) !important;
+  max-width: 280px !important;
   padding: 16px 24px !important;
   border: none !important;
   border-radius: 16px !important;
@@ -361,6 +363,8 @@ const getSkillIdFromLevelId = (levelId) => {
   color: white !important;
   box-shadow: 0 6px 20px rgba(255, 0, 127, 0.4) !important;
   text-transform: none !important;
+  margin: 0 auto !important;
+  display: block !important;
 }
 
 .btn-continuar-modern:hover:not(:disabled) {
@@ -423,6 +427,14 @@ const getSkillIdFromLevelId = (levelId) => {
     border-radius: 20px;
   }
   
+  .action-section {
+    padding: 0 15px;
+  }
+  
+  .btn-continuar-modern {
+    width: calc(100% - 30px) !important;
+  }
+  
   .completion-header h1 { 
     font-size: 18px; 
   }
@@ -452,6 +464,14 @@ const getSkillIdFromLevelId = (levelId) => {
   .completion-card {
     margin: 10px;
     padding: 25px 15px;
+  }
+  
+  .action-section {
+    padding: 0 10px;
+  }
+  
+  .btn-continuar-modern {
+    width: calc(100% - 20px) !important;
   }
   
   .congrats-title { 

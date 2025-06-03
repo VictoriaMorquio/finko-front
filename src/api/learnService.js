@@ -6,6 +6,9 @@ import { processImageUrls } from '@/utils/imageUtils.js';
 const USE_MOCK_DATA = API_CONFIG.USE_MOCK_DATA;
 const MOCK_DELAY = 400;
 
+// ✅ MOCK: Variable para simular pasos fallidos registrados para repaso
+const mockFailedSteps = new Set();
+
 // Servicios reales para API - TODOS LOS ENDPOINTS IMPLEMENTADOS
 const realLearnService = {
   async getLearnDashboard() {
@@ -261,11 +264,51 @@ const mockLearnService = {
           stepId: stepId,
           answer: answer
         };
+        
         console.log('🚀 MOCK SERVICE - Quiz answer submitted:', quizData);
+        
+        // 🎯 MEJORADO: Detectar si es drag-drop y manejar respuestas incorrectas
+        let isCorrect;
+        
+        if (typeof answer === 'boolean') {
+          // Para drag-drop: si answer=false significa que hubo errores
+          isCorrect = answer === true;
+          console.log('📦 MOCK SERVICE - Drag-drop detectado:', { answer, isCorrect });
+          
+          // ✅ IMPORTANTE: Si hay errores en drag-drop, registrar para repaso
+          if (!isCorrect) {
+            console.log('❌ MOCK SERVICE - Registrando drag-drop fallido para repaso:', {
+              lessonId,
+              stepId,
+              type: 'drag-drop'
+            });
+            // Aquí el backend real registraría esto en la base de datos
+            mockFailedSteps.add(`${lessonId}:${stepId}`);
+          }
+        } else {
+          // Para quiz normal: 50% probabilidad
+          isCorrect = Math.random() > 0.5;
+          
+          // Si es incorrecto, registrar para repaso
+          if (!isCorrect) {
+            console.log('❌ MOCK SERVICE - Registrando quiz fallido para repaso:', {
+              lessonId,
+              stepId,
+              type: 'quiz'
+            });
+            mockFailedSteps.add(`${lessonId}:${stepId}`);
+          }
+        }
+        
         resolve({ 
           success: true, 
-          correct: Math.random() > 0.5, // 50% de probabilidad de ser correcto
-          message: Math.random() > 0.5 ? '¡Correcto!' : 'Respuesta incorrecta'
+          correct: isCorrect,
+          message: isCorrect ? '¡Correcto!' : 'Respuesta incorrecta',
+          // Metadatos adicionales que puede usar el frontend
+          metadata: {
+            type: typeof answer === 'boolean' ? 'drag-drop' : 'quiz',
+            registeredForReview: !isCorrect
+          }
         });
       }, MOCK_DELAY);
     });
