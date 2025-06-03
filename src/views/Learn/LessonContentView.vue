@@ -76,9 +76,12 @@ const backRoute = computed(() => {
     return { name: 'UnitSkills', params: { unitId } };
 });
 
-const goToNextStep = () => {
+const goToNextStep = async () => {
   if (lessonStep.value?.isLastStep) {
-    router.push({ name: 'LevelCompleted', params: { levelId: lessonId.value } });
+    console.log('🏁 CONTENT - Es el último step, verificando repasos antes de completar...');
+    // ✅ USAR EL SISTEMA DE VERIFICACIÓN DE REPASOS
+    const { handleLessonCompletion } = await import('@/utils/stepNavigation');
+    await handleLessonCompletion(router, learnStore, lessonId.value);
   } else {
     const steps = learnStore.currentLesson?.allSteps || [];
     const isLastStep = lessonStep.value?.isLastStep || false;
