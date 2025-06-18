@@ -9,35 +9,35 @@ export const API_CONFIG = {
   // Endpoints implementados en el backend que están listos para usar
   IMPLEMENTED_ENDPOINTS: {
     AUTH: {
-      LOGIN: '/auth/login',
-      SIGNUP: '/auth/signup', 
-      LOGOUT: '/auth/logout',
-      ME: '/auth/me',
-      UPDATE_ME: '/auth/me',
-      CHANGE_PASSWORD: '/auth/me/password',
-      PASSWORD_RESET: '/auth/password-reset',
-      PASSWORD_RESET_CONFIRM: '/auth/password-reset/confirm',
-      UPLOAD_PROFILE_PIC: '/auth/me/profile-pic',
-      DELETE_ACCOUNT: '/auth/me/account'
+      LOGIN: '/v1/auth/login',
+      SIGNUP: '/v1/auth/signup', 
+      LOGOUT: '/v1/auth/logout',
+      ME: '/v1/auth/me',
+      UPDATE_ME: '/v1/auth/me',
+      CHANGE_PASSWORD: '/v1/auth/me/password',
+      PASSWORD_RESET: '/v1/auth/password-reset',
+      PASSWORD_RESET_CONFIRM: '/v1/auth/password-reset/confirm',
+      UPLOAD_PROFILE_PIC: '/v1/auth/me/profile-pic',
+      DELETE_ACCOUNT: '/v1/auth/me/account'
     },
     LEARN: {
       // ✅ TODOS LOS ENDPOINTS IMPLEMENTADOS Y FUNCIONANDO
-      DASHBOARD: '/learn/dashboard',
-      UNIT_SKILLS: '/learn/units/{unitId}/skills',
-      SKILL_LESSONS: '/learn/skills/{skillId}/lessons',
-      LESSON_INTRO: '/learn/lessons/{lessonId}/intro',
-      LESSON_STEPS: '/learn/lessons/{lessonId}/steps',
-      LESSON_STEP: '/learn/lessons/{lessonId}/steps/{stepId}',
-      LEVEL_COMPLETED: '/learn/levels/{levelId}/completed',
-      QUIZ_SUBMIT: '/learn/quiz/submit',
+      DASHBOARD: '/v1/learn/dashboard',
+      UNIT_SKILLS: '/v1/learn/units/{unitId}/skills',
+      SKILL_LESSONS: '/v1/learn/skills/{skillId}/lessons',
+      LESSON_INTRO: '/v1/learn/lessons/{lessonId}/intro',
+      LESSON_STEPS: '/v1/learn/lessons/{lessonId}/steps',
+      LESSON_STEP: '/v1/learn/lessons/{lessonId}/steps/{stepId}',
+      LEVEL_COMPLETED: '/v1/learn/levels/{levelId}/completed',
+      QUIZ_SUBMIT: '/v1/learn/quiz/submit',
       // ✅ NUEVOS ENDPOINTS DE SISTEMA DE REPASOS
-      REVIEW_STATUS: '/learn/lessons/{lessonId}/review/status',
-      REVIEW_NEXT: '/learn/lessons/{lessonId}/review/next',
-      REVIEW_RESET: '/learn/lessons/{lessonId}/review/reset'
+      REVIEW_STATUS: '/v1/learn/lessons/{lessonId}/review/status',
+      REVIEW_NEXT: '/v1/learn/lessons/{lessonId}/review/next',
+      REVIEW_RESET: '/v1/learn/lessons/{lessonId}/review/reset'
     },
     SUPPORT: {
-      CONTACT: '/support/contact',
-      CONTACT_INFO: '/support/contact-info'
+      CONTACT: '/v1/support/contact',
+      CONTACT_INFO: '/v1/support/contact-info'
     }
   }
 }

@@ -51,20 +51,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   const setUser = (userData) => {
     user.value = userData
-    if (userData) {
-      localStorage.setItem('finkoUser', JSON.stringify(userData))
-    } else {
-      localStorage.removeItem('finkoUser')
-    }
   }
 
   const setToken = (tokenValue) => {
     token.value = tokenValue
-    if (tokenValue) {
-      localStorage.setItem('finko_auth_token', tokenValue)
-    } else {
-      localStorage.removeItem('finko_auth_token')
-    }
   }
 
   // ========================================
@@ -207,43 +197,25 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Inicializar usuario desde localStorage o fetch del servidor
   const initializeAuth = async () => {
-    // Solo intentar inicializar si hay un token válido
-    if (!token.value) {
-      console.log('No hay token disponible, saltando inicialización de auth')
-      return
-    }
-
-    // Primero intentar cargar desde localStorage
-    const storedUser = localStorage.getItem('finkoUser')
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser)
-        setUser(parsedUser)
-        console.log('Usuario cargado desde localStorage')
-      } catch (e) {
-        console.error('Error parsing stored user:', e)
+    if (token.value) {
+      // Primero intentar cargar desde localStorage
+      const storedUser = localStorage.getItem('finkoUser')
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser)
+          setUser(parsedUser)
+        } catch (e) {
+          console.error('Error parsing stored user:', e)
+        }
       }
-    }
-    
-    // Luego validar/actualizar desde el servidor (solo si hay un usuario válido)
-    if (user.value) {
-      try {
-        await fetchUser()
-        console.log('Usuario validado desde el servidor')
-      } catch (err) {
-        console.error('Auth initialization failed:', err)
-        // fetchUser ya maneja si debe desloguear o no
-      }
-    } else {
-      console.log('No hay usuario en localStorage, intentando fetch del servidor')
-      try {
-        await fetchUser()
-      } catch (err) {
-        console.error('Error fetching user during initialization:', err)
-        // Si falla el fetch y no hay usuario, limpiar el token
-        if (!user.value) {
-          console.log('No se pudo obtener usuario, limpiando token')
-          logout()
+      
+      // Luego validar/actualizar desde el servidor (solo si hay un usuario válido)
+      if (user.value) {
+        try {
+          await fetchUser()
+        } catch (err) {
+          console.error('Auth initialization failed:', err)
+          // fetchUser ya maneja si debe desloguear o no
         }
       }
     }

@@ -16,9 +16,9 @@ export let users = [ // 'export let' para permitir modificaciones desde los serv
       levelsCompleted: 12,
     },
     achievements: [
-      { id: 'ach1', title: 'Primera lección', image: '/images/achievement/achievement1.png', bgColor: '#FCE9BF' },
-      { id: 'ach2', title: 'Racha de 5 días', image: '/images/achievement/achievement2.png', bgColor: '#FADBC5' },
-      { id: 'ach3', title: '10 Niveles', image: '/images/achievement/achievement3.png', bgColor: '#F0F0F0' },
+      { id: 'ach1', title: 'Primera lección', image: '/images/achievement1.png', bgColor: '#FCE9BF' },
+      { id: 'ach2', title: 'Racha de 5 días', image: '/images/achievement2.png', bgColor: '#FADBC5' },
+      { id: 'ach3', title: '10 Niveles', image: '/images/achievement3.png', bgColor: '#F0F0F0' },
     ]
   }
 ];

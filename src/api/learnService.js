@@ -12,42 +12,42 @@ const mockFailedSteps = new Set();
 // Servicios reales para API - TODOS LOS ENDPOINTS IMPLEMENTADOS
 const realLearnService = {
   async getLearnDashboard() {
-    const response = await httpClient.get('/learn/dashboard');
+    const response = await httpClient.get('/v1/learn/dashboard');
     return processImageUrls(response);
   },
 
   async getUnitSkills(unitId) {
-    const response = await httpClient.get(`/learn/units/${unitId}/skills`);
+    const response = await httpClient.get(`/v1/learn/units/${unitId}/skills`);
     return processImageUrls(response);
   },
 
   async getSkillLessons(skillId) {
-    const response = await httpClient.get(`/learn/skills/${skillId}/lessons`);
+    const response = await httpClient.get(`/v1/learn/skills/${skillId}/lessons`);
     return processImageUrls(response);
   },
 
   async getLessonIntro(lessonId) {
-    const response = await httpClient.get(`/learn/lessons/${lessonId}/intro`);
+    const response = await httpClient.get(`/v1/learn/lessons/${lessonId}/intro`);
     return processImageUrls(response);
   },
 
   async getLessonStep(lessonId, stepId) {
-    const response = await httpClient.get(`/learn/lessons/${lessonId}/steps/${stepId}`);
+    const response = await httpClient.get(`/v1/learn/lessons/${lessonId}/steps/${stepId}`);
     return processImageUrls(response);
   },
 
   async getLessonSteps(lessonId) {
-    const response = await httpClient.get(`/learn/lessons/${lessonId}/steps`);
+    const response = await httpClient.get(`/v1/learn/lessons/${lessonId}/steps`);
     return processImageUrls(response);
   },
 
   async getLevelCompletedData(levelId) {
-    const response = await httpClient.get(`/learn/levels/${levelId}/completed`);
+    const response = await httpClient.get(`/v1/learn/levels/${levelId}/completed`);
     return processImageUrls(response);
   },
 
   async submitQuiz(quizData) {
-    const response = await httpClient.post('/learn/quiz/submit', quizData);
+    const response = await httpClient.post('/v1/learn/quiz/submit', quizData);
     return response;
   },
 
@@ -65,17 +65,17 @@ const realLearnService = {
 
   // Nuevos endpoints para sistema de repasos
   async getReviewStatus(lessonId) {
-    const response = await httpClient.get(`/learn/lessons/${lessonId}/review/status`);
+    const response = await httpClient.get(`/v1/learn/lessons/${lessonId}/review/status`);
     return processImageUrls(response);
   },
 
   async getNextReviewStep(lessonId) {
-    const response = await httpClient.get(`/learn/lessons/${lessonId}/review/next`);
+    const response = await httpClient.get(`/v1/learn/lessons/${lessonId}/review/next`);
     return processImageUrls(response);
   },
 
   async resetReviewQueue(lessonId) {
-    const response = await httpClient.post(`/learn/lessons/${lessonId}/review/reset`);
+    const response = await httpClient.post(`/v1/learn/lessons/${lessonId}/review/reset`);
     return processImageUrls(response);
   }
 };

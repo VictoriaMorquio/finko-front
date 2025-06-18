@@ -121,7 +121,7 @@ const mockAuth = {
 // Funciones para API real
 const realAuth = {
   async login(credentials) {
-    const response = await httpClient.post('/auth/login', credentials);
+    const response = await httpClient.post('/v1/auth/login', credentials);
     
     // Guardar token en localStorage
     if (response.token) {
@@ -132,7 +132,7 @@ const realAuth = {
   },
 
   async signup(userData) {
-    const response = await httpClient.post('/auth/signup', userData);
+    const response = await httpClient.post('/v1/auth/signup', userData);
     
     if (response.token) {
       localStorage.setItem('finko_auth_token', response.token);
@@ -142,29 +142,29 @@ const realAuth = {
   },
 
   async requestPasswordReset(emailOrUsername) {
-    return await httpClient.post('/auth/password-reset', { 
+    return await httpClient.post('/v1/auth/password-reset', { 
       emailOrUsername 
     });
   },
 
   async confirmNewPassword(token, newPassword) {
-    return await httpClient.post('/auth/password-reset/confirm', {
+    return await httpClient.post('/v1/auth/password-reset/confirm', {
       token,
       newPassword
     });
   },
 
   async getCurrentUser() {
-    console.log('🌐 REAL AUTH - Llamando a /auth/me');
-    const response = await httpClient.get('/auth/me');
-    console.log('🌐 REAL AUTH - Respuesta de /auth/me:', response);
+    console.log('🌐 REAL AUTH - Llamando a /v1/auth/me');
+    const response = await httpClient.get('/v1/auth/me');
+    console.log('🌐 REAL AUTH - Respuesta de /v1/auth/me:', response);
     console.log('🌐 REAL AUTH - ¿Tiene achievements en response?:', response.achievements);
     return response;
   },
 
   async logout() {
     try {
-      await httpClient.post('/auth/logout');
+      await httpClient.post('/v1/auth/logout');
     } finally {
       // Limpiar token independientemente del resultado
       localStorage.removeItem('finko_auth_token');

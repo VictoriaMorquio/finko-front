@@ -272,12 +272,12 @@ const mockProfile = {
 // Servicios reales para API
 const realProfile = {
   async updateUserProfile(userId, profileDetails) {
-    return await httpClient.put('/auth/me', profileDetails);
+    return await httpClient.put('/v1/auth/me', profileDetails);
   },
 
   async logout() {
     try {
-      await httpClient.post('/auth/logout');
+      await httpClient.post('/v1/auth/logout');
       return { success: true };
     } finally {
       localStorage.removeItem('finko_auth_token');
@@ -285,7 +285,7 @@ const realProfile = {
   },
 
   async deleteAccount(deleteData) {
-    const response = await httpClient.delete('/auth/me/account', {
+    const response = await httpClient.delete('/v1/auth/me/account', {
       currentPassword: deleteData.currentPassword,
       confirmDelete: deleteData.confirmDelete
     });
@@ -300,7 +300,7 @@ const realProfile = {
   },
 
   async contactSupport(messageData) {
-    const response = await httpClient.post('/support/contact', messageData);
+    const response = await httpClient.post('/v1/support/contact', messageData);
     return { 
       success: true, 
       message: response.message || 'Tu mensaje ha sido enviado. Nos pondremos en contacto pronto.' 
@@ -308,16 +308,16 @@ const realProfile = {
   },
 
   async getProfile() {
-    // El perfil se obtiene a través de /auth/me
-    return await httpClient.get('/auth/me');
+    // El perfil se obtiene a través de /v1/auth/me
+    return await httpClient.get('/v1/auth/me');
   },
 
   async updateProfile(profileData) {
-    return await httpClient.put('/auth/me', profileData);
+    return await httpClient.put('/v1/auth/me', profileData);
   },
 
   async changePassword(currentPassword, newPassword, confirmNewPassword) {
-    return await httpClient.put('/auth/me/password', {
+    return await httpClient.put('/v1/auth/me/password', {
       currentPassword,
       newPassword,
       confirmNewPassword
@@ -347,7 +347,7 @@ const realProfile = {
     const formData = new FormData();
     formData.append('profilePic', file);
     
-    const response = await httpClient.postFile('/auth/me/profile-pic', formData);
+    const response = await httpClient.postFile('/v1/auth/me/profile-pic', formData);
     
     return {
       avatarUrl: response.profilePicUrl || response.avatarUrl,
