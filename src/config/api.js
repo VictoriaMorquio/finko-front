@@ -1,7 +1,7 @@
 // Configuración de API
 export const API_CONFIG = {
-  // URL base del backend Spring Boot
-  BASE_URL: 'https://localhost:8443',
+  // URL base usando el proxy de Vite
+  BASE_URL: '/api',
   
   // Cambiar esto a false cuando quieras conectar con el backend real
   USE_MOCK_DATA: false,
