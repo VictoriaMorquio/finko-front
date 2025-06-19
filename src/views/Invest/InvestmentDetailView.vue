@@ -10,8 +10,8 @@
     <main class="detail-content">
       <div class="investment-name">{{ detail.name }}</div>
       <div class="current-price">{{ formatCurrency(detail.currentPrice) }}</div>
-      <div class="price-change" :class="getPriceChangeColor(detail.priceChangePercent)">
-        {{ formatPriceChange(detail.priceChangePercent) }}
+      <div class="price-change" :class="getPriceChangeColor(detail.priceChange24h)">
+        {{ formatPriceChange(detail.priceChange24h) }}
       </div>
 
       <!-- Gráfica de rendimiento específica de la inversión -->
@@ -143,11 +143,11 @@ const formatCurrency = (value) => {
   return parseFloat(value).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
 };
 
-const formatPriceChange = (priceChangePercent) => {
-  if (priceChangePercent === null || priceChangePercent === undefined) return '0,00%';
-  const value = parseFloat(priceChangePercent);
+const formatPriceChange = (priceChange) => {
+  if (priceChange === null || priceChange === undefined) return '0,00€';
+  const value = parseFloat(priceChange);
   const isPositive = value >= 0;
-  return `${isPositive ? '+' : ''}${value.toFixed(2)}%`;
+  return `${isPositive ? '+' : ''}${value.toFixed(2)}€`;
 };
 
 const formatPerformancePercentage = (value) => {
@@ -160,9 +160,9 @@ const priceChangeIsPositive = (priceChange) => {
     return priceChange !== null && priceChange !== undefined && parseFloat(priceChange) >= 0;
 };
 
-const getPriceChangeColor = (priceChangePercent) => {
-    if (priceChangePercent === null || priceChangePercent === undefined) return '';
-    const value = parseFloat(priceChangePercent);
+const getPriceChangeColor = (priceChange) => {
+    if (priceChange === null || priceChange === undefined) return '';
+    const value = parseFloat(priceChange);
     return value >= 0 ? 'positive-change' : 'negative-change';
 };
 
@@ -209,33 +209,43 @@ const changeTimeInterval = async (interval) => {
 const loadInvestmentData = async () => {
   let startDate = null;
   let endDate = null;
+  let backendInterval = null;
   
   // Calcular fechas basadas en el intervalo seleccionado
   const today = new Date();
-  const endDateObj = new Date();
   
   switch (selectedInterval.value) {
     case '1week':
       startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      endDate = new Date(today);
+      backendInterval = '1day';
       break;
     case '1month':
-      // Usar un rango más amplio para asegurar que hay datos
-      startDate = new Date('2024-05-18'); // Fecha que funciona en Postman
-      endDate = new Date('2025-06-18');   // Fecha que funciona en Postman
+      // Último mes real - dinámico
+      startDate = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+      endDate = new Date(today);
+      backendInterval = '1day'; // ✅ Backend espera '1day' para último mes
       break;
     case '3months':
       startDate = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
+      endDate = new Date(today);
+      backendInterval = '1day';
       break;
     case '6months':
       startDate = new Date(today.getTime() - 180 * 24 * 60 * 60 * 1000);
+      endDate = new Date(today);
+      backendInterval = '1week';
       break;
     case '1year':
       startDate = new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000);
+      endDate = new Date(today);
+      backendInterval = '1month';
       break;
     case 'all':
-      // Para 'all' usar el rango completo que funciona en Postman
+      // Para 'all' usar el rango completo disponible en el backend
       startDate = new Date('2024-05-18');
       endDate = new Date('2025-06-18');
+      backendInterval = '1month';
       break;
   }
   
@@ -244,18 +254,19 @@ const loadInvestmentData = async () => {
     startDate = startDate.toISOString().split('T')[0];
   }
   if (endDate) {
-    endDate = endDateObj.toISOString().split('T')[0];
+    endDate = endDate.toISOString().split('T')[0];
   }
   
-  console.log('📅 Fechas calculadas:', { 
-    interval: selectedInterval.value, 
+  console.log('📅 Fechas y parámetros calculados:', { 
+    frontendInterval: selectedInterval.value,
+    backendInterval,
     startDate, 
     endDate,
     today: today.toISOString().split('T')[0]
   });
   
-  // Cargar datos con los parámetros calculados
-  await investStore.fetchInvestmentDetail(investmentId, selectedInterval.value, startDate, endDate);
+  // Cargar datos con los parámetros correctos para el backend
+  await investStore.fetchInvestmentDetail(investmentId, backendInterval, startDate, endDate);
 };
 
 const navigateToBuy = () => {
@@ -280,7 +291,7 @@ const navigateToSell = () => {
 /* PageHeader maneja la cabecera */
 
 .detail-content {
-  padding: 10px 20px 140px; /* Aumenté el padding-bottom para los botones fijos */
+  padding: 10px 20px 20px;
   flex-grow: 1;
 }
 
@@ -465,59 +476,28 @@ const navigateToSell = () => {
 
 .action-buttons {
   display: flex;
-  gap: 12px;
+  gap: 15px;
   padding: 20px;
   border-top: 1px solid #EFE9EC; /* Línea sutil */
   background-color: #FDFBFC; /* Asegurar que tiene fondo */
 }
 
-/* Estilos base para los botones de acción */
-:deep(.action-buttons .base-button) {
-  flex: 1 !important;
-  padding: 18px 24px !important;
-  border: none !important;
-  border-radius: 50px !important;
-  font-size: 16px !important;
-  font-weight: 600 !important;
-  cursor: pointer !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-  min-height: 56px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
+.action-buttons .btn { /* Estilos base para los botones de acción */
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
-
-/* Estilo del botón Comprar - rosa vibrante */
-:deep(.btn-buy.base-button) { 
-  background: linear-gradient(135deg, #F72152 0%, #E91E63 100%) !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(247, 33, 82, 0.3) !important;
-}
-:deep(.btn-buy.base-button:hover:not(:disabled)) { 
-  background: linear-gradient(135deg, #E60048 0%, #D81B5A 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 16px rgba(247, 33, 82, 0.4) !important;
-}
-
-/* Estilo del botón Vender - gris elegante */
-:deep(.btn-sell.base-button) { 
-  background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%) !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(158, 158, 158, 0.3) !important;
-}
-:deep(.btn-sell.base-button:hover:not(:disabled)) { 
-  background: linear-gradient(135deg, #757575 0%, #616161 100%) !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 16px rgba(158, 158, 158, 0.4) !important;
-}
-:deep(.btn-sell.base-button:disabled) { 
-  background: linear-gradient(135deg, #E0E0E0 0%, #BDBDBD 100%) !important;
-  cursor: not-allowed !important;
-  transform: none !important;
-  box-shadow: 0 2px 4px rgba(189, 189, 189, 0.2) !important;
-}
+/* BaseButton usará variants, pero podemos definir aquí si es más fácil */
+.btn-buy { background-color: #FF007F; color: white; }
+.btn-buy:hover { background-color: #E60072; }
+.btn-sell { background-color: #8A8A8A; color: white; }
+.btn-sell:hover { background-color: #707070; }
+.btn-sell:disabled { background-color: #BDBDBD; cursor: not-allowed;}
 
 .loading-message, .error-message-centered {
     text-align: center;

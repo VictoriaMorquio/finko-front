@@ -64,92 +64,120 @@ const series = computed(() => {
   }]
 })
 
-const chartOptions = computed(() => ({
-  chart: {
-    type: 'area',
-    toolbar: {
-      show: false
-    },
-    zoom: {
-      enabled: false
-    },
-    sparkline: {
-      enabled: false
-    },
-    animations: {
-      enabled: false
-    },
-    dropShadow: {
-      enabled: false
-    },
-    fontFamily: 'inherit'
-  },
-  stroke: {
-    curve: 'smooth',
-    width: 2,
-    colors: [props.color],
-    opacity: 1.0
-  },
-  colors: [props.color],
-  grid: {
-    show: false
-  },
-  xaxis: {
-    type: 'datetime',
-    labels: {
-      show: true,
-      style: {
-        colors: '#999999',
-        fontSize: '11px',
-        fontWeight: '400',
-        fontFamily: 'inherit'
-      },
-      formatter: function (value) {
+const chartOptions = computed(() => {
+  // Calcular el rango de fechas para determinar el formato de etiquetas
+  let dateFormatter = function (value) {
+    return new Date(value).toLocaleDateString('es-ES', { month: 'short' })
+  }
+  
+  if (props.data && props.data.length > 1) {
+    const firstDate = new Date(props.data[0].x)
+    const lastDate = new Date(props.data[props.data.length - 1].x)
+    const daysDifference = (lastDate - firstDate) / (1000 * 60 * 60 * 24)
+    
+    if (daysDifference <= 60) {
+      // Menos de 2 meses: mostrar días
+      dateFormatter = function (value) {
+        return new Date(value).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+      }
+    } else if (daysDifference <= 730) {
+      // Menos de 2 años: mostrar meses
+      dateFormatter = function (value) {
         return new Date(value).toLocaleDateString('es-ES', { month: 'short' })
       }
-    },
-    axisBorder: {
-      show: false
-    },
-    axisTicks: {
-      show: false
+    } else {
+      // Más de 2 años: mostrar años
+      dateFormatter = function (value) {
+        return new Date(value).toLocaleDateString('es-ES', { year: 'numeric' })
+      }
     }
-  },
-  yaxis: {
-    labels: {
-      show: false
-    }
-  },
-  tooltip: {
-    enabled: props.showTooltip,
-    theme: 'light',
-    style: {
-      fontSize: '12px',
+  }
+  
+  return {
+    chart: {
+      type: 'area',
+      toolbar: {
+        show: false
+      },
+      zoom: {
+        enabled: false
+      },
+      sparkline: {
+        enabled: false
+      },
+      animations: {
+        enabled: false
+      },
+      dropShadow: {
+        enabled: false
+      },
       fontFamily: 'inherit'
     },
-    x: {
-      format: 'dd MMM yyyy'
+    stroke: {
+      curve: 'smooth',
+      width: 2,
+      colors: [props.color],
+      opacity: 1.0
     },
-    y: {
-      formatter: (value) => `€${value.toFixed(2)}`
-    }
-  },
-  markers: {
-    size: 0,
-    hover: {
-      size: 4,
-      sizeOffset: 2
-    }
-  },
-  fill: {
-    type: 'solid',
     colors: [props.color],
-    opacity: 0.8
-  },
-  dataLabels: {
-    enabled: false
+    grid: {
+      show: false
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        show: true,
+        style: {
+          colors: '#999999',
+          fontSize: '11px',
+          fontWeight: '400',
+          fontFamily: 'inherit'
+        },
+        formatter: dateFormatter
+      },
+      axisBorder: {
+        show: false
+      },
+      axisTicks: {
+        show: false
+      }
+    },
+    yaxis: {
+      labels: {
+        show: false
+      }
+    },
+    tooltip: {
+      enabled: props.showTooltip,
+      theme: 'light',
+      style: {
+        fontSize: '12px',
+        fontFamily: 'inherit'
+      },
+      x: {
+        format: 'dd MMM yyyy'
+      },
+      y: {
+        formatter: (value) => `€${value.toFixed(2)}`
+      }
+    },
+    markers: {
+      size: 0,
+      hover: {
+        size: 4,
+        sizeOffset: 2
+      }
+    },
+    fill: {
+      type: 'solid',
+      colors: [props.color],
+      opacity: 0.8
+    },
+    dataLabels: {
+      enabled: false
+    }
   }
-}))
+})
 </script>
 
 <style scoped>
