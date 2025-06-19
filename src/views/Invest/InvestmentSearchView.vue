@@ -251,7 +251,7 @@ const selectStock = (stock) => {
   // Navegar al detalle de la inversión usando el ID
   router.push({ 
     name: 'InvestmentDetail', 
-    params: { investmentId: stock.id } 
+    params: { id: stock.id } 
   });
 };
 </script>

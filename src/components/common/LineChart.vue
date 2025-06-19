@@ -14,6 +14,11 @@
     <div v-else class="chart-empty">
       <p>No hay datos disponibles</p>
     </div>
+    
+    <!-- Debug info -->
+    <div v-if="false" style="font-size: 10px; color: #999; margin-top: 10px;">
+      Debug: isLoading={{ isLoading }}, series.length={{ series.length }}
+    </div>
   </div>
 </template>
 
@@ -53,51 +58,54 @@ const props = defineProps({
 
 const series = computed(() => {
   if (!props.data || props.data.length === 0) return []
-  
   return [{
-    name: props.title || 'Valor',
-    data: props.data.map(item => ({
-      x: item.date || item.x,
-      y: item.price || item.value || item.y
-    }))
+    name: props.title || 'Precio',
+    data: props.data
   }]
 })
 
 const chartOptions = computed(() => ({
   chart: {
-    type: 'line',
+    type: 'area',
     toolbar: {
       show: false
     },
     zoom: {
       enabled: false
-    }
-  },
-  title: {
-    text: props.title,
-    style: {
-      fontSize: '16px',
-      fontWeight: '600',
-      color: '#111111'
-    }
+    },
+    sparkline: {
+      enabled: false
+    },
+    animations: {
+      enabled: false
+    },
+    dropShadow: {
+      enabled: false
+    },
+    fontFamily: 'inherit'
   },
   stroke: {
     curve: 'smooth',
-    width: 3,
-    colors: [props.color]
+    width: 5,
+    colors: [props.color],
+    opacity: 1.0
   },
   colors: [props.color],
   grid: {
-    show: props.showGrid,
-    borderColor: '#E0E0E0',
-    strokeDashArray: 4
+    show: false
   },
   xaxis: {
     type: 'datetime',
     labels: {
+      show: true,
       style: {
-        colors: '#666666',
-        fontSize: '12px'
+        colors: '#999999',
+        fontSize: '11px',
+        fontWeight: '400',
+        fontFamily: 'inherit'
+      },
+      formatter: function (value) {
+        return new Date(value).toLocaleDateString('es-ES', { month: 'short' })
       }
     },
     axisBorder: {
@@ -109,50 +117,37 @@ const chartOptions = computed(() => ({
   },
   yaxis: {
     labels: {
-      style: {
-        colors: '#666666',
-        fontSize: '12px'
-      },
-      formatter: (value) => {
-        if (value >= 1000) {
-          return `$${(value / 1000).toFixed(1)}k`
-        }
-        return `$${value.toFixed(2)}`
-      }
+      show: false
     }
   },
   tooltip: {
     enabled: props.showTooltip,
     theme: 'light',
     style: {
-      fontSize: '12px'
+      fontSize: '12px',
+      fontFamily: 'inherit'
     },
     x: {
       format: 'dd MMM yyyy'
     },
     y: {
-      formatter: (value) => `$${value.toFixed(2)}`
+      formatter: (value) => `€${value.toFixed(2)}`
     }
   },
   markers: {
     size: 0,
     hover: {
-      size: 6,
-      sizeOffset: 3
+      size: 4,
+      sizeOffset: 2
     }
   },
   fill: {
-    type: 'gradient',
-    gradient: {
-      shade: 'light',
-      type: 'vertical',
-      shadeIntensity: 0.1,
-      gradientToColors: [props.color],
-      inverseColors: false,
-      opacityFrom: 0.1,
-      opacityTo: 0,
-      stops: [0, 100]
-    }
+    type: 'solid',
+    colors: [props.color],
+    opacity: 0.8
+  },
+  dataLabels: {
+    enabled: false
   }
 }))
 </script>
@@ -160,10 +155,9 @@ const chartOptions = computed(() => ({
 <style scoped>
 .line-chart-container {
   width: 100%;
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
 }
 
 .chart-loading,

@@ -1,9 +1,10 @@
 <template>
   <div class="buy-sell-stock-page">
     <PageHeader
-        title="Vender"
-        :show-close="true"
-        :back-route="{ name: 'InvestmentDetail', params: { investmentId: investmentId } }"
+        title="Vender Acciones"
+        :show-back="true"
+        :back-route="{ name: 'InvestmentDetail', params: { id: investmentId } }"
+        bg-color="#FDFBFC"
     />
 
     <main class="buy-sell-stock-form-content" v-if="investmentDetail">
@@ -61,7 +62,7 @@ import BaseButton from '@/components/common/BaseButton.vue';
 const route = useRoute();
 const router = useRouter();
 const investStore = useInvestStore();
-const investmentId = route.params.investmentId;
+const investmentId = route.params.id;
 
 const form = ref({
   amount: '', // En euros
@@ -126,7 +127,7 @@ const handleSellStock = async () => {
     alert('¡Venta realizada con éxito! (simulación)');
     investStore.fetchInvestmentDetail(investmentId);
     investStore.fetchInvestmentsDashboard();
-    router.push({ name: 'InvestmentDetail', params: { investmentId } });
+    router.push({ name: 'InvestmentDetail', params: { id: investmentId } });
   } catch (error) {
     console.error("Error al vender:", error);
   }

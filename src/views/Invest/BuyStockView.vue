@@ -1,9 +1,10 @@
 <template>
   <div class="buy-sell-stock-page">
     <PageHeader
-        title="Comprar"
-        :show-close="true"
-        :back-route="{ name: 'InvestmentDetail', params: { investmentId: investmentId } }"
+        title="Comprar Acciones"
+        :show-back="true"
+        :back-route="{ name: 'InvestmentDetail', params: { id: investmentId } }"
+        bg-color="#FDFBFC"
     />
 
     <main class="buy-sell-stock-form-content" v-if="investmentDetail">
@@ -60,7 +61,7 @@ import BaseButton from '@/components/common/BaseButton.vue';
 const route = useRoute();
 const router = useRouter();
 const investStore = useInvestStore();
-const investmentId = route.params.investmentId;
+const investmentId = route.params.id;
 
 const form = ref({
   amount: '', // En euros
@@ -109,7 +110,7 @@ const handleBuyStock = async () => {
     // Actualizar datos y volver al detalle
     investStore.fetchInvestmentDetail(investmentId);
     investStore.fetchInvestmentsDashboard(); // Para actualizar la lista general
-    router.push({ name: 'InvestmentDetail', params: { investmentId } });
+    router.push({ name: 'InvestmentDetail', params: { id: investmentId } });
   } catch (error) {
     // El error se maneja en el store
     console.error("Error al comprar:", error);

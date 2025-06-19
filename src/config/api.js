@@ -41,7 +41,9 @@ export const API_CONFIG = {
     },
     INVEST: {
       // ✅ ENDPOINT UNIFICADO IMPLEMENTADO
-      SEARCH: '/v1/investments/search' // Maneja tanto lista como búsqueda
+      SEARCH: '/v1/investments/search', // Maneja tanto lista como búsqueda
+      // ✅ ENDPOINT DE DETALLE IMPLEMENTADO
+      DETAIL: '/v1/investments/{investmentId}/details' // Detalle con datos históricos
     }
   }
 }

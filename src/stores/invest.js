@@ -37,14 +37,21 @@ export const useInvestStore = defineStore('invest', {
         this.loading = false;
       }
     },
-    async fetchInvestmentDetail(investmentId) {
+    async fetchInvestmentDetail(investmentId, interval = '1month', startDate = null, endDate = null) {
       this.loading = true;
       this.error = null;
       this.currentInvestmentDetail = null;
       try {
-        const data = await investService.getInvestmentDetail(investmentId);
-        this.currentInvestmentDetail = data;
+        console.log('🚀 Iniciando fetchInvestmentDetail con parámetros:', { investmentId, interval, startDate, endDate });
+        const data = await investService.getInvestmentDetail(investmentId, interval, startDate, endDate);
+        console.log('📡 Respuesta del servicio:', data);
+        
+        // Procesar los datos del backend para adaptarlos al formato esperado por el frontend
+        const processedData = this.processInvestmentDetailData(data);
+        console.log('✅ Datos procesados finales:', processedData);
+        this.currentInvestmentDetail = processedData;
       } catch (err) {
+        console.error('❌ Error en fetchInvestmentDetail:', err);
         this.error = err.message || `Fallo al cargar detalle de inversión ${investmentId}.`;
         console.error(err);
       } finally {
@@ -151,6 +158,243 @@ export const useInvestStore = defineStore('invest', {
       } finally {
         this.loading = false;
       }
+    },
+    // Método para procesar los datos del backend y adaptarlos al formato del frontend
+    processInvestmentDetailData(data) {
+      console.log('🔍 Datos recibidos del backend:', data);
+      
+      const { investment, historicalData, sharesOwned, totalInvested, averageBuyPrice, currentValue, returnEur, returnPercent, buyPrice, sellPrice, priceChangePercent } = data;
+      
+      console.log('📊 Datos de inversión:', investment);
+      console.log('📈 Datos históricos:', historicalData?.length || 0, 'puntos');
+      console.log('💰 Métricas financieras:', { sharesOwned, totalInvested, averageBuyPrice, currentValue, returnEur, returnPercent, buyPrice, sellPrice, priceChangePercent });
+      
+      // Procesar datos históricos para el gráfico
+      const chartData = this.processHistoricalDataForChart(historicalData);
+      console.log('📊 Datos procesados para gráfico:', chartData);
+      
+      // Crear métricas directamente desde los datos del servidor
+      const metrics = this.createMetricsFromServerData({
+        currentPrice: investment.currentPrice,
+        priceChange24h: investment.priceChange24h,
+        sharesOwned,
+        totalInvested,
+        averageBuyPrice,
+        currentValue,
+        returnEur,
+        returnPercent,
+        buyPrice,
+        sellPrice,
+        priceChangePercent
+      });
+      
+      console.log('📋 Métricas del servidor:', metrics);
+      
+      return {
+        // Datos básicos de la inversión
+        id: investment.id,
+        name: investment.name,
+        stockSymbol: investment.stockSymbol,
+        category: investment.category,
+        iconUrl: investment.iconUrl,
+        currentPrice: investment.currentPrice,
+        priceChange24h: investment.priceChange24h,
+        
+        // Datos del gráfico
+        chartData,
+        
+        // Métricas del servidor
+        metrics,
+        
+        // Datos de propiedad (exactamente como vienen del servidor)
+        sharesOwned,
+        totalInvested,
+        averageBuyPrice,
+        currentValue,
+        returnEur,
+        returnPercent,
+        
+        // Precios de compra/venta (exactamente como vienen del servidor)
+        buyPrice,
+        sellPrice,
+        priceChangePercent,
+        
+        // Información adicional
+        about: this.generateAboutText(investment.name, investment.stockSymbol)
+      };
+    },
+    
+    // Procesar datos históricos para el gráfico
+    processHistoricalDataForChart(historicalData) {
+      console.log('📈 Procesando datos históricos:', historicalData);
+      console.log('📈 Tipo de datos:', typeof historicalData);
+      console.log('📈 Es array:', Array.isArray(historicalData));
+      console.log('📈 Longitud:', historicalData?.length);
+      
+      if (!historicalData || historicalData.length === 0) {
+        console.log('⚠️ No hay datos históricos disponibles');
+        return [];
+      }
+      
+      // Verificar la estructura del primer elemento
+      const firstItem = historicalData[0];
+      console.log('📊 Primer elemento:', firstItem);
+      console.log('📊 Propiedades del primer elemento:', Object.keys(firstItem));
+      
+      // Ordenar por fecha (más antigua primero para mostrar cronológicamente)
+      const sortedData = [...historicalData].sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        console.log(`📅 Comparando fechas: ${a.date} vs ${b.date} -> ${dateA} vs ${dateB}`);
+        return dateA - dateB;
+      });
+      console.log('📅 Datos ordenados cronológicamente:', sortedData.length, 'puntos');
+      
+      // Crear array de datos en el formato que espera el componente LineChart
+      const chartData = sortedData.map((item, index) => {
+        const price = parseFloat(item.close);
+        // Convertir fecha a timestamp para ApexCharts
+        const timestamp = new Date(item.date).getTime();
+        console.log(`📊 [${index}] Fecha: ${item.date}, Precio: ${price} (timestamp: ${timestamp})`);
+        return {
+          x: timestamp,
+          y: price
+        };
+      });
+      
+      console.log('✅ Datos procesados para gráfico:', chartData);
+      console.log('✅ Total de puntos:', chartData.length);
+      return chartData;
+    },
+    
+    // Crear métricas directamente desde los datos del servidor
+    createMetricsFromServerData(data) {
+      const {
+        currentPrice,
+        priceChange24h,
+        sharesOwned,
+        totalInvested,
+        averageBuyPrice,
+        currentValue,
+        returnEur,
+        returnPercent,
+        buyPrice,
+        sellPrice,
+        priceChangePercent
+      } = data;
+      
+      const metrics = [];
+      
+      // Precio actual (del servidor)
+      if (currentPrice !== null && currentPrice !== undefined) {
+        metrics.push({
+          label: 'Precio actual',
+          value: `€${parseFloat(currentPrice).toFixed(2)}`,
+          positive: null
+        });
+      }
+      
+      // Cambio 24h (del servidor)
+      if (priceChange24h !== null && priceChange24h !== undefined) {
+        const isPositive = priceChange24h >= 0;
+        metrics.push({
+          label: 'Cambio 24h',
+          value: `${isPositive ? '+' : ''}€${parseFloat(priceChange24h).toFixed(2)}`,
+          positive: isPositive
+        });
+      }
+      
+      // Acciones que posees (del servidor)
+      if (sharesOwned !== null && sharesOwned !== undefined) {
+        metrics.push({
+          label: 'Acciones que posees',
+          value: sharesOwned.toString(),
+          positive: null
+        });
+      }
+      
+      // Total invertido (del servidor)
+      if (totalInvested !== null && totalInvested !== undefined) {
+        metrics.push({
+          label: 'Total invertido',
+          value: `€${parseFloat(totalInvested).toFixed(2)}`,
+          positive: null
+        });
+      }
+      
+      // Precio promedio de compra (del servidor)
+      if (averageBuyPrice !== null && averageBuyPrice !== undefined) {
+        metrics.push({
+          label: 'Precio promedio de compra',
+          value: `€${parseFloat(averageBuyPrice).toFixed(2)}`,
+          positive: null
+        });
+      }
+      
+      // Valor actual (del servidor)
+      if (currentValue !== null && currentValue !== undefined) {
+        metrics.push({
+          label: 'Valor actual',
+          value: `€${parseFloat(currentValue).toFixed(2)}`,
+          positive: null
+        });
+      }
+      
+      // Retorno total (del servidor)
+      if (returnEur !== null && returnEur !== undefined) {
+        const isPositive = returnEur >= 0;
+        metrics.push({
+          label: 'Retorno total',
+          value: `${isPositive ? '+' : ''}€${parseFloat(returnEur).toFixed(2)}`,
+          positive: isPositive
+        });
+      }
+      
+      // Retorno porcentual (del servidor)
+      if (returnPercent !== null && returnPercent !== undefined) {
+        const isPositive = returnPercent >= 0;
+        metrics.push({
+          label: 'Retorno porcentual',
+          value: `${isPositive ? '+' : ''}${parseFloat(returnPercent).toFixed(2)}%`,
+          positive: isPositive
+        });
+      }
+      
+      // Precio de compra (del servidor)
+      if (buyPrice !== null && buyPrice !== undefined) {
+        metrics.push({
+          label: 'Precio de compra',
+          value: `€${parseFloat(buyPrice).toFixed(2)}`,
+          positive: null
+        });
+      }
+      
+      // Precio de venta (del servidor)
+      if (sellPrice !== null && sellPrice !== undefined) {
+        metrics.push({
+          label: 'Precio de venta',
+          value: `€${parseFloat(sellPrice).toFixed(2)}`,
+          positive: null
+        });
+      }
+      
+      // Cambio de precio porcentual (del servidor)
+      if (priceChangePercent !== null && priceChangePercent !== undefined) {
+        const isPositive = priceChangePercent >= 0;
+        metrics.push({
+          label: 'Cambio de precio',
+          value: `${isPositive ? '+' : ''}${parseFloat(priceChangePercent).toFixed(2)}%`,
+          positive: isPositive
+        });
+      }
+      
+      return metrics;
+    },
+    
+    // Generar texto descriptivo sobre la empresa
+    generateAboutText(name, symbol) {
+      const companyName = name?.replace(/\.? CEDEAR$/, '') || 'Esta empresa';
+      return `${companyName} (${symbol}) es una empresa que cotiza en los mercados financieros. Los datos mostrados incluyen información histórica de precios y métricas de rendimiento.`;
     },
   },
 }) 

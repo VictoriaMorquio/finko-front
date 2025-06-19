@@ -103,7 +103,7 @@ const handleSearch = () => {
 };
 
 const navigateToDetail = (investmentId) => {
-  router.push({ name: 'InvestmentDetail', params: { investmentId } });
+  router.push({ name: 'InvestmentDetail', params: { id: investmentId } });
 };
 
 const formatMainPercentage = (value) => {

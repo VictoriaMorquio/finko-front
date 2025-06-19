@@ -22,8 +22,24 @@ const realInvestService = {
     return response;
   },
 
-  async getInvestmentDetail(investmentId) {
-    const response = await httpClient.get(`/v1/invest/${investmentId}`);
+  async getInvestmentDetail(investmentId, interval = '1month', startDate = null, endDate = null) {
+    const params = new URLSearchParams();
+    
+    // Parámetros opcionales
+    if (interval) {
+      params.append('interval', interval);
+    }
+    if (startDate) {
+      params.append('start_date', startDate);
+    }
+    if (endDate) {
+      params.append('end_date', endDate);
+    }
+    
+    const url = `/v1/investments/${investmentId}/details${params.toString() ? `?${params.toString()}` : ''}`;
+    console.log('📊 Llamando endpoint de detalle:', url);
+    console.log('📅 Parámetros enviados:', { investmentId, interval, startDate, endDate });
+    const response = await httpClient.get(url);
     return response;
   },
 
@@ -226,13 +242,13 @@ const mockInvestService = {
   }
 };
 
-// 🔧 SERVICIO HÍBRIDO: Real para búsqueda, Mock para el resto
+// 🔧 SERVICIO HÍBRIDO: Real para búsqueda y detalles, Mock para el resto
 const hybridInvestService = {
   // Usar mock para dashboard
   getInvestmentsDashboard: mockInvestService.getInvestmentsDashboard,
   
-  // Usar mock para detalles
-  getInvestmentDetail: mockInvestService.getInvestmentDetail,
+  // ✅ USAR ENDPOINT REAL para detalles de inversión
+  getInvestmentDetail: realInvestService.getInvestmentDetail,
   
   // Usar mock para compra/venta
   buyStock: mockInvestService.buyStock,
