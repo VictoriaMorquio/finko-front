@@ -280,7 +280,7 @@ const navigateToSell = () => {
 /* PageHeader maneja la cabecera */
 
 .detail-content {
-  padding: 10px 20px 20px;
+  padding: 10px 20px 140px; /* Aumenté el padding-bottom para los botones fijos */
   flex-grow: 1;
 }
 
