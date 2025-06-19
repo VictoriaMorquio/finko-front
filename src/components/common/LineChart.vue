@@ -86,7 +86,7 @@ const chartOptions = computed(() => ({
   },
   stroke: {
     curve: 'smooth',
-    width: 5,
+    width: 2,
     colors: [props.color],
     opacity: 1.0
   },
