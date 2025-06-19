@@ -10,8 +10,8 @@
     <main class="detail-content">
       <div class="investment-name">{{ detail.name }}</div>
       <div class="current-price">{{ formatCurrency(detail.currentPrice) }}</div>
-      <div class="price-change" :class="getPriceChangeColor(detail.priceChange24h)">
-        {{ formatPriceChange(detail.priceChange24h) }}
+      <div class="price-change" :class="getPriceChangeColor(detail.priceChangePercent)">
+        {{ formatPriceChange(detail.priceChangePercent) }}
       </div>
 
       <!-- Gráfica de rendimiento específica de la inversión -->
@@ -143,11 +143,11 @@ const formatCurrency = (value) => {
   return parseFloat(value).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
 };
 
-const formatPriceChange = (priceChange) => {
-  if (priceChange === null || priceChange === undefined) return '0,00€';
-  const value = parseFloat(priceChange);
+const formatPriceChange = (priceChangePercent) => {
+  if (priceChangePercent === null || priceChangePercent === undefined) return '0.00%';
+  const value = parseFloat(priceChangePercent);
   const isPositive = value >= 0;
-  return `${isPositive ? '+' : ''}${value.toFixed(2)}€`;
+  return `${isPositive ? '+' : ''}${value.toFixed(2)}%`;
 };
 
 const formatPerformancePercentage = (value) => {
@@ -160,9 +160,9 @@ const priceChangeIsPositive = (priceChange) => {
     return priceChange !== null && priceChange !== undefined && parseFloat(priceChange) >= 0;
 };
 
-const getPriceChangeColor = (priceChange) => {
-    if (priceChange === null || priceChange === undefined) return '';
-    const value = parseFloat(priceChange);
+const getPriceChangeColor = (priceChangePercent) => {
+    if (priceChangePercent === null || priceChangePercent === undefined) return '';
+    const value = parseFloat(priceChangePercent);
     return value >= 0 ? 'positive-change' : 'negative-change';
 };
 
