@@ -99,7 +99,7 @@ const changeFilter = (filterValue) => {
 };
 
 const handleSearch = () => {
-  alert("Funcionalidad de búsqueda no implementada en este mock.");
+  router.push({ name: 'InvestmentSearch' });
 };
 
 const navigateToDetail = (investmentId) => {

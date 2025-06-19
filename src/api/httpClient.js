@@ -29,6 +29,12 @@ class HttpClient {
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`
     
+    console.log('🌐 HTTP Request:', {
+      method: options.method || 'GET',
+      url: url,
+      headers: this.getDefaultHeaders()
+    });
+    
     const config = {
       method: 'GET',
       headers: this.getDefaultHeaders(),
@@ -39,8 +45,21 @@ class HttpClient {
       }
     }
 
+    // Si es una petición HTTPS directa al backend, configurar para certificados autofirmados
+    if (url.startsWith('https://localhost:8443')) {
+      // Para peticiones directas al backend con certificado autofirmado
+      // En el navegador, esto requerirá que el usuario acepte el certificado manualmente
+      console.log('🔒 Petición HTTPS directa al backend - Asegúrate de aceptar el certificado autofirmado');
+    }
+
     try {
       const response = await fetch(url, config)
+      
+      console.log('📡 HTTP Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url
+      });
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: 'Error del servidor' }))

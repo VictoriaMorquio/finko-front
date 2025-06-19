@@ -4,7 +4,7 @@ export const API_CONFIG = {
   BASE_URL: '/api',
   
   // Cambiar esto a false cuando quieras conectar con el backend real
-  USE_MOCK_DATA: false,
+  USE_MOCK_DATA: false, // Conectar con el backend real
   
   // Endpoints implementados en el backend que están listos para usar
   IMPLEMENTED_ENDPOINTS: {
@@ -38,6 +38,10 @@ export const API_CONFIG = {
     SUPPORT: {
       CONTACT: '/v1/support/contact',
       CONTACT_INFO: '/v1/support/contact-info'
+    },
+    INVEST: {
+      // ✅ ENDPOINT UNIFICADO IMPLEMENTADO
+      SEARCH: '/v1/investments/search' // Maneja tanto lista como búsqueda
     }
   }
 }

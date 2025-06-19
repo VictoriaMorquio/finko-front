@@ -12,6 +12,14 @@ export const useInvestStore = defineStore('invest', {
       investments: []
     },
     currentInvestmentDetail: null,
+    // Estado para búsqueda de acciones
+    searchResults: {
+      acciones: [],
+      page: 0,
+      isLastPage: false,
+      totalElements: 0,
+      totalPages: 0
+    },
     loading: false,
     error: null,
   }),
@@ -42,6 +50,74 @@ export const useInvestStore = defineStore('invest', {
       } finally {
         this.loading = false;
       }
+    },
+    async searchStocks(query = '', page = 0, size = 200) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const response = await investService.searchStocks(query, page, size);
+        
+        // Adaptar la respuesta del endpoint unificado
+        console.log('📊 Datos recibidos del backend:', response.content?.[0]); // Log del primer elemento
+        
+        const adaptedResponse = {
+          content: (response.content || []).map(investment => {
+            console.log('🔍 Mapeando inversión:', {
+              id: investment.id,
+              name: investment.name,
+              stockSymbol: investment.stockSymbol,
+              currentPrice: investment.currentPrice,
+              priceChange24h: investment.priceChange24h,
+              performance: investment.performance
+            });
+            
+            return {
+              // Mapear campos del backend a la estructura esperada por el frontend
+              id: investment.id,
+              symbol: investment.stockSymbol || investment.name?.split(' ')[0] || investment.id,
+              name: investment.name || 'Sin nombre'
+            };
+          }),
+          number: response.page || page,
+          last: response.last || false,
+          totalElements: response.totalElements || 0,
+          totalPages: response.totalPages || 0
+        };
+        
+        if (page === 0) {
+          // Primera página: reemplazar resultados
+          this.searchResults.acciones = adaptedResponse.content;
+        } else {
+          // Páginas siguientes: añadir a resultados existentes (solo para lista, no búsqueda)
+          this.searchResults.acciones = [...this.searchResults.acciones, ...adaptedResponse.content];
+        }
+        
+        this.searchResults.page = adaptedResponse.number;
+        this.searchResults.isLastPage = adaptedResponse.last;
+        this.searchResults.totalElements = adaptedResponse.totalElements;
+        this.searchResults.totalPages = adaptedResponse.totalPages;
+        
+        return adaptedResponse;
+      } catch (err) {
+        this.error = err.message || 'Fallo al buscar acciones.';
+        console.error(err);
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+    async loadMoreStocks(query = '', size = 200) {
+      if (this.searchResults.isLastPage || this.loading) return;
+      
+      const nextPage = this.searchResults.page + 1;
+      return this.searchStocks(query, nextPage, size);
+    },
+    clearSearchResults() {
+      this.searchResults.acciones = [];
+      this.searchResults.page = 0;
+      this.searchResults.isLastPage = false;
+      this.searchResults.totalElements = 0;
+      this.searchResults.totalPages = 0;
     },
     async buyStock(investmentId, amount, shares) {
       this.loading = true;

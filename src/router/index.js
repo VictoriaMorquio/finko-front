@@ -23,6 +23,7 @@ import InvestmentsDashboardView from '@/views/Invest/InvestmentsDashboardView.vu
 import InvestmentDetailView from '@/views/Invest/InvestmentDetailView.vue'
 import BuyStockView from '@/views/Invest/BuyStockView.vue'
 import SellStockView from '@/views/Invest/SellStockView.vue'
+import InvestmentSearchView from '@/views/Invest/InvestmentSearchView.vue'
 
 // Chat Views
 import ChatView from '@/views/Chat/ChatView.vue'
@@ -120,6 +121,12 @@ const routes = [
     path: '/invest',
     name: 'InvestmentsDashboard',
     component: InvestmentsDashboardView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/invest/search',
+    name: 'InvestmentSearch',
+    component: InvestmentSearchView,
     meta: { requiresAuth: true }
   },
   {
