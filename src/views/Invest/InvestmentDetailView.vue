@@ -107,12 +107,12 @@ const selectedInterval = ref('1month'); // Por defecto 1 mes
 
 // Definir intervalos de tiempo disponibles
 const timeIntervals = [
-  { value: '1week', label: '1S' },
+  { value: '1day', label: '1D' },
   { value: '1month', label: '1M' },
   { value: '3months', label: '3M' },
   { value: '6months', label: '6M' },
   { value: '1year', label: '1A' },
-  { value: 'all', label: 'Todo' }
+  { value: '5years', label: '5A' }
 ];
 
 onMounted(() => {
@@ -189,12 +189,12 @@ const getPerformanceSubInfo = () => {
 
 const getIntervalLabel = (interval) => {
     const labels = {
-        '1week': 'Última semana',
+        '1day': 'Último día',
         '1month': 'Último mes',
         '3months': 'Últimos 3 meses',
         '6months': 'Últimos 6 meses',
         '1year': 'Último año',
-        'all': 'Desde el inicio'
+        '5years': 'Últimos 5 años'
     };
     return labels[interval] || 'Período seleccionado';
 };
@@ -215,10 +215,10 @@ const loadInvestmentData = async () => {
   const today = new Date();
   
   switch (selectedInterval.value) {
-    case '1week':
-      startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case '1day':
+      startDate = new Date(today.getTime() - 24 * 60 * 60 * 1000);
       endDate = new Date(today);
-      backendInterval = '1day';
+      backendInterval = '1h'; // ✅ Backend espera '1h' para datos por horas
       break;
     case '1month':
       // Último mes real - dinámico
@@ -241,10 +241,9 @@ const loadInvestmentData = async () => {
       endDate = new Date(today);
       backendInterval = '1month';
       break;
-    case 'all':
-      // Para 'all' usar el rango completo disponible en el backend
-      startDate = new Date('2024-05-18');
-      endDate = new Date('2025-06-18');
+    case '5years':
+      startDate = new Date(today.getTime() - 5 * 365 * 24 * 60 * 60 * 1000);
+      endDate = new Date(today);
       backendInterval = '1month';
       break;
   }

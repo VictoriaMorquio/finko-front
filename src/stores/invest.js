@@ -285,107 +285,72 @@ export const useInvestStore = defineStore('invest', {
       
       const metrics = [];
       
-      // Precio actual (del servidor)
-      if (currentPrice !== null && currentPrice !== undefined) {
-        metrics.push({
-          label: 'Precio actual',
-          value: `€${parseFloat(currentPrice).toFixed(2)}`,
-          positive: null
-        });
-      }
-      
-      // Cambio 24h (del servidor)
-      if (priceChange24h !== null && priceChange24h !== undefined) {
-        const isPositive = priceChange24h >= 0;
-        metrics.push({
-          label: 'Cambio 24h',
-          value: `${isPositive ? '+' : ''}€${parseFloat(priceChange24h).toFixed(2)}`,
-          positive: isPositive
-        });
-      }
-      
-      // Acciones que posees (del servidor)
-      if (sharesOwned !== null && sharesOwned !== undefined) {
-        metrics.push({
-          label: 'Acciones que posees',
-          value: sharesOwned.toString(),
-          positive: null
-        });
-      }
-      
-      // Total invertido (del servidor)
-      if (totalInvested !== null && totalInvested !== undefined) {
-        metrics.push({
-          label: 'Total invertido',
-          value: `€${parseFloat(totalInvested).toFixed(2)}`,
-          positive: null
-        });
-      }
-      
-      // Precio promedio de compra (del servidor)
-      if (averageBuyPrice !== null && averageBuyPrice !== undefined) {
-        metrics.push({
-          label: 'Precio promedio de compra',
-          value: `€${parseFloat(averageBuyPrice).toFixed(2)}`,
-          positive: null
-        });
-      }
-      
-      // Valor actual (del servidor)
-      if (currentValue !== null && currentValue !== undefined) {
-        metrics.push({
-          label: 'Valor actual',
-          value: `€${parseFloat(currentValue).toFixed(2)}`,
-          positive: null
-        });
-      }
-      
-      // Retorno total (del servidor)
-      if (returnEur !== null && returnEur !== undefined) {
-        const isPositive = returnEur >= 0;
-        metrics.push({
-          label: 'Retorno total',
-          value: `${isPositive ? '+' : ''}€${parseFloat(returnEur).toFixed(2)}`,
-          positive: isPositive
-        });
-      }
-      
-      // Retorno porcentual (del servidor)
-      if (returnPercent !== null && returnPercent !== undefined) {
-        const isPositive = returnPercent >= 0;
-        metrics.push({
-          label: 'Retorno porcentual',
-          value: `${isPositive ? '+' : ''}${parseFloat(returnPercent).toFixed(2)}%`,
-          positive: isPositive
-        });
-      }
-      
-      // Precio de compra (del servidor)
-      if (buyPrice !== null && buyPrice !== undefined) {
-        metrics.push({
-          label: 'Precio de compra',
-          value: `€${parseFloat(buyPrice).toFixed(2)}`,
-          positive: null
-        });
-      }
-      
-      // Precio de venta (del servidor)
-      if (sellPrice !== null && sellPrice !== undefined) {
-        metrics.push({
-          label: 'Precio de venta',
-          value: `€${parseFloat(sellPrice).toFixed(2)}`,
-          positive: null
-        });
-      }
-      
-      // Cambio de precio porcentual (del servidor)
-      if (priceChangePercent !== null && priceChangePercent !== undefined) {
-        const isPositive = priceChangePercent >= 0;
-        metrics.push({
-          label: 'Cambio de precio',
-          value: `${isPositive ? '+' : ''}${parseFloat(priceChangePercent).toFixed(2)}%`,
-          positive: isPositive
-        });
+      // Lógica condicional: si no hay inversión (totalInvested = 0), solo mostrar precios
+      if (!totalInvested || totalInvested === 0) {
+        // Solo precios de compra/venta cuando no hay inversión
+        if (buyPrice !== null && buyPrice !== undefined) {
+          metrics.push({
+            label: 'Precio de compra',
+            value: `€${parseFloat(buyPrice).toFixed(2)}`,
+            positive: null
+          });
+        }
+        
+        if (sellPrice !== null && sellPrice !== undefined) {
+          metrics.push({
+            label: 'Precio de venta',
+            value: `€${parseFloat(sellPrice).toFixed(2)}`,
+            positive: null
+          });
+        }
+      } else {
+        // Cuando hay inversión, mostrar métricas específicas en orden
+        
+        // 1. Total invertido
+        if (totalInvested !== null && totalInvested !== undefined) {
+          metrics.push({
+            label: 'Total invertido',
+            value: `€${parseFloat(totalInvested).toFixed(2)}`,
+            positive: null
+          });
+        }
+        
+        // 2. Acciones en propiedad
+        if (sharesOwned !== null && sharesOwned !== undefined) {
+          metrics.push({
+            label: 'Acciones en propiedad',
+            value: sharesOwned.toString(),
+            positive: null
+          });
+        }
+        
+        // 3. Retorno (EUR + porcentaje entre paréntesis)
+        if (returnEur !== null && returnEur !== undefined && returnPercent !== null && returnPercent !== undefined) {
+          const isPositive = returnEur >= 0;
+          metrics.push({
+            label: 'Retorno',
+            value: `${isPositive ? '+' : ''}€${parseFloat(returnEur).toFixed(2)} (${isPositive ? '+' : ''}${parseFloat(returnPercent).toFixed(1)}%)`,
+            positive: isPositive
+          });
+        }
+        
+        // 4. Precio de compra
+        if (buyPrice !== null && buyPrice !== undefined) {
+          metrics.push({
+            label: 'Precio de compra',
+            value: `€${parseFloat(buyPrice).toFixed(2)}`,
+            positive: null
+          });
+        }
+        
+        // 5. Precio de venta
+        if (sellPrice !== null && sellPrice !== undefined) {
+          metrics.push({
+            label: 'Precio de venta',
+            value: `€${parseFloat(sellPrice).toFixed(2)}`,
+            positive: null
+          });
+        }
       }
       
       return metrics;

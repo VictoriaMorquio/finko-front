@@ -75,7 +75,12 @@ const chartOptions = computed(() => {
     const lastDate = new Date(props.data[props.data.length - 1].x)
     const daysDifference = (lastDate - firstDate) / (1000 * 60 * 60 * 24)
     
-    if (daysDifference <= 60) {
+    if (daysDifference <= 1) {
+      // Menos de 1 día: mostrar horas
+      dateFormatter = function (value) {
+        return new Date(value).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+      }
+    } else if (daysDifference <= 60) {
       // Menos de 2 meses: mostrar días
       dateFormatter = function (value) {
         return new Date(value).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
@@ -125,15 +130,19 @@ const chartOptions = computed(() => {
     },
     xaxis: {
       type: 'datetime',
+      tickAmount: 5,
       labels: {
         show: true,
+        maxHeight: undefined,
         style: {
           colors: '#999999',
           fontSize: '11px',
           fontWeight: '400',
           fontFamily: 'inherit'
         },
-        formatter: dateFormatter
+        formatter: dateFormatter,
+        rotateAlways: false,
+        hideOverlappingLabels: true
       },
       axisBorder: {
         show: false
@@ -143,8 +152,18 @@ const chartOptions = computed(() => {
       }
     },
     yaxis: {
+      tickAmount: 4,
       labels: {
-        show: false
+        show: true,
+        style: {
+          colors: '#999999',
+          fontSize: '11px',
+          fontWeight: '400',
+          fontFamily: 'inherit'
+        },
+        formatter: function (value) {
+          return `€${value.toFixed(0)}`
+        }
       }
     },
     tooltip: {
