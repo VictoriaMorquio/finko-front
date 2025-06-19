@@ -121,16 +121,7 @@ onMounted(() => {
 });
 
 const detail = computed(() => {
-  const data = investStore.currentInvestmentDetail;
-  if (data && data.chartData) {
-    console.log('🔍 Datos de gráfica:', {
-      chartData: !!data.chartData,
-      isArray: Array.isArray(data.chartData),
-      dataLength: data.chartData?.length,
-      hasData: data.chartData && data.chartData.length > 0
-    });
-  }
-  return data;
+  return investStore.currentInvestmentDetail;
 });
 
 const canSell = computed(() => {
@@ -249,23 +240,11 @@ const loadInvestmentData = async () => {
   }
   
   // Formatear fechas como YYYY-MM-DD
-  if (startDate) {
-    startDate = startDate.toISOString().split('T')[0];
-  }
-  if (endDate) {
-    endDate = endDate.toISOString().split('T')[0];
-  }
-  
-  console.log('📅 Fechas y parámetros calculados:', { 
-    frontendInterval: selectedInterval.value,
-    backendInterval,
-    startDate, 
-    endDate,
-    today: today.toISOString().split('T')[0]
-  });
+  const formattedStartDate = startDate ? startDate.toISOString().split('T')[0] : null;
+  const formattedEndDate = endDate ? endDate.toISOString().split('T')[0] : null;
   
   // Cargar datos con los parámetros correctos para el backend
-  await investStore.fetchInvestmentDetail(investmentId, backendInterval, startDate, endDate);
+  await investStore.fetchInvestmentDetail(investmentId, backendInterval, formattedStartDate, formattedEndDate);
 };
 
 const navigateToBuy = () => {
@@ -290,7 +269,7 @@ const navigateToSell = () => {
 /* PageHeader maneja la cabecera */
 
 .detail-content {
-  padding: 10px 20px 20px;
+  padding: 10px 20px 120px;
   flex-grow: 1;
 }
 
@@ -475,28 +454,62 @@ const navigateToSell = () => {
 
 .action-buttons {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   padding: 20px;
-  border-top: 1px solid #EFE9EC; /* Línea sutil */
-  background-color: #FDFBFC; /* Asegurar que tiene fondo */
+  border-top: 1px solid #EFE9EC;
+  background-color: #FDFBFC;
 }
 
-.action-buttons .btn { /* Estilos base para los botones de acción */
+/* Estilos base para todos los botones */
+.action-buttons :deep(.base-button) {
   flex: 1;
-  padding: 16px;
+  padding: 18px 24px;
   border: none;
-  border-radius: 12px;
-  font-size: 18px;
-  font-weight: bold;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
-/* BaseButton usará variants, pero podemos definir aquí si es más fácil */
-.btn-buy { background-color: #FF007F; color: white; }
-.btn-buy:hover { background-color: #E60072; }
-.btn-sell { background-color: #8A8A8A; color: white; }
-.btn-sell:hover { background-color: #707070; }
-.btn-sell:disabled { background-color: #BDBDBD; cursor: not-allowed;}
+
+/* Botón Comprar - gradiente fucsia */
+.action-buttons :deep(.btn-buy) { 
+  background: linear-gradient(135deg, #F72152 0%, #E91E63 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(247, 33, 82, 0.3);
+}
+
+.action-buttons :deep(.btn-buy:hover:not(:disabled)) { 
+  background: linear-gradient(135deg, #E60048 0%, #D81B5A 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(247, 33, 82, 0.4);
+}
+
+/* Botón Vender - gradiente gris */
+.action-buttons :deep(.btn-sell) { 
+  background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(158, 158, 158, 0.3);
+}
+
+.action-buttons :deep(.btn-sell:hover:not(:disabled)) { 
+  background: linear-gradient(135deg, #757575 0%, #616161 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(158, 158, 158, 0.4);
+}
+
+.action-buttons :deep(.btn-sell:disabled) { 
+  background: linear-gradient(135deg, #E0E0E0 0%, #BDBDBD 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 4px rgba(189, 189, 189, 0.2);
+}
 
 .loading-message, .error-message-centered {
     text-align: center;
