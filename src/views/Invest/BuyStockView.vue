@@ -9,8 +9,7 @@
 
     <main class="buy-sell-stock-form-content" v-if="investmentDetail">
       <h2 class="form-title">Comprar Acciones de {{ investmentDetail.name.split('(')[0].trim() }}</h2>
-      <p class="current-price-info">Precio Actual: {{ formatCurrency(investmentDetail.currentPrice) }}</p>
-
+      <p class="current-price-info">Precio de Compra: {{ formatCurrency(buyPrice) }}</p>
 
       <form id="buyStockForm" @submit.prevent="handleBuyStock">
         <BaseInput
@@ -20,21 +19,23 @@
           type="number"
           placeholder="0.00"
           step="0.01"
-          min="0"
+          min="1"
           @input="calculateShares"
+          :error-message="getAmountError()"
         />
         <BaseInput
           id="shares"
           v-model="form.shares"
-          label="Acciones (aprox.)"
+          label="Acciones a obtener"
           type="number"
           placeholder="0"
-          step="0.0001"
+          step="0.000001"
           min="0"
-          @input="calculateAmount"
+          :disabled="true"
+          help-text="Este valor se calcula automáticamente según la cantidad invertida"
         />
         <p v-if="estimatedTotal > 0" class="estimated-total">
-            Total Estimado: {{ formatCurrency(estimatedTotal) }}
+            Total: {{ formatCurrency(estimatedTotal) }}
         </p>
         <p v-if="investStore.error" class="error-message">{{ investStore.error }}</p>
         <p v-if="formError" class="error-message">{{ formError }}</p>
@@ -43,20 +44,35 @@
      <div v-else-if="investStore.loading" class="loading-message">Cargando datos...</div>
 
     <footer class="action-button-container">
-      <BaseButton type="submit" form="buyStockForm" :disabled="investStore.loading || !form.amount || parseFloat(form.amount) <= 0" variant="primary">
+      <BaseButton 
+        type="submit" 
+        form="buyStockForm" 
+        :disabled="investStore.loading || !isFormValid" 
+        variant="primary"
+      >
         {{ investStore.loading ? 'Comprando...' : 'Comprar' }}
       </BaseButton>
     </footer>
+
+    <!-- Modal de confirmación de compra exitosa -->
+    <TransactionSuccessModal
+      :is-visible="showSuccessModal"
+      :title="'¡Compra Exitosa!'"
+      :message="successMessage"
+      :icon="'🎉'"
+      @close="handleModalClose"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useInvestStore } from '@/stores/invest';
 import PageHeader from '@/components/common/PageHeader.vue';
 import BaseInput from '@/components/common/BaseInput.vue';
 import BaseButton from '@/components/common/BaseButton.vue';
+import TransactionSuccessModal from '@/components/common/TransactionSuccessModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -68,6 +84,8 @@ const form = ref({
   shares: '', // Número de acciones
 });
 const formError = ref('');
+const showSuccessModal = ref(false);
+const successMessage = ref('');
 
 onMounted(() => {
   if (!investStore.currentInvestmentDetail || investStore.currentInvestmentDetail.id !== investmentId) {
@@ -76,21 +94,18 @@ onMounted(() => {
 });
 
 const investmentDetail = computed(() => investStore.currentInvestmentDetail);
-const currentPrice = computed(() => parseFloat(investmentDetail.value?.currentPrice) || 0);
+
+// Usar buyPrice en lugar de currentPrice
+const buyPrice = computed(() => {
+  return parseFloat(investmentDetail.value?.buyPrice) || 0;
+});
 
 const calculateShares = () => {
-  if (currentPrice.value > 0 && form.value.amount) {
-    form.value.shares = (parseFloat(form.value.amount) / currentPrice.value).toFixed(4);
-  } else if (!form.value.amount) {
+  if (buyPrice.value > 0 && form.value.amount && parseFloat(form.value.amount) > 0) {
+    const amount = parseFloat(form.value.amount);
+    form.value.shares = (amount / buyPrice.value).toFixed(6);
+  } else {
     form.value.shares = '';
-  }
-};
-
-const calculateAmount = () => {
-  if (currentPrice.value > 0 && form.value.shares) {
-    form.value.amount = (parseFloat(form.value.shares) * currentPrice.value).toFixed(2);
-  } else if (!form.value.shares) {
-    form.value.amount = '';
   }
 };
 
@@ -98,24 +113,60 @@ const estimatedTotal = computed(() => {
     return form.value.amount ? parseFloat(form.value.amount) : 0;
 });
 
+// Validación del formulario
+const isFormValid = computed(() => {
+  const amount = parseFloat(form.value.amount);
+  return amount >= 1 && form.value.shares && parseFloat(form.value.shares) > 0;
+});
+
+const getAmountError = () => {
+  const amount = parseFloat(form.value.amount);
+  if (form.value.amount && amount < 1) {
+    return 'El mínimo de inversión es 1€';
+  }
+  return '';
+};
+
 const handleBuyStock = async () => {
   formError.value = '';
-  if (!form.value.amount || parseFloat(form.value.amount) <= 0) {
-      formError.value = "Por favor, introduce una cantidad válida.";
-      return;
+  
+  // Validaciones finales
+  const amount = parseFloat(form.value.amount);
+  const shares = parseFloat(form.value.shares);
+  
+  if (!amount || amount < 1) {
+    formError.value = "El mínimo de inversión es 1€.";
+    return;
   }
+  
+  if (!shares || shares <= 0) {
+    formError.value = "Número de acciones inválido.";
+    return;
+  }
+
   try {
-    await investStore.buyStock(investmentId, parseFloat(form.value.amount), parseFloat(form.value.shares));
-    alert('¡Compra realizada con éxito! (simulación)');
-    // Actualizar datos y volver al detalle
+    const result = await investStore.buyStock(investmentId, amount, shares);
+    
+    // Mostrar modal de éxito en lugar de alert
+    successMessage.value = result.message || `Compra de ${shares.toFixed(6)} acciones realizada exitosamente. Total: ${formatCurrency(amount)}`;
+    showSuccessModal.value = true;
+    
+    // Actualizar datos en background
     investStore.fetchInvestmentDetail(investmentId);
-    investStore.fetchInvestmentsDashboard(); // Para actualizar la lista general
-    router.push({ name: 'InvestmentDetail', params: { id: investmentId } });
+    investStore.fetchInvestmentsDashboard();
+    
   } catch (error) {
-    // El error se maneja en el store
     console.error("Error al comprar:", error);
+    // El error se maneja en el store
   }
 };
+
+const handleModalClose = () => {
+  showSuccessModal.value = false;
+  // Redireccionar al detalle de la inversión
+  router.push({ name: 'InvestmentDetail', params: { id: investmentId } });
+};
+
 const formatCurrency = (value) => {
   if (value === null || value === undefined) return "0,00€";
   return parseFloat(value).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
@@ -149,6 +200,7 @@ const formatCurrency = (value) => {
     color: #555;
     margin-bottom: 30px;
     text-align: left;
+    font-weight: 500;
 }
 
 /* BaseInput usa por defecto el fondo rosa pálido que coincide con el diseño */
@@ -171,6 +223,13 @@ const formatCurrency = (value) => {
   right: 0;
   z-index: 90;
 }
+
+.error-message {
+  color: #D32F2F;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
 /* BaseButton usa variant finko-confirm-buy-sell */
 .loading-message {
     text-align: center; padding: 50px 20px; font-size: 16px; color: #555;

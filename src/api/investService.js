@@ -44,7 +44,7 @@ const realInvestService = {
   },
 
   async buyStock(investmentId, amount, shares) {
-    const response = await httpClient.post(`/v1/invest/${investmentId}/buy`, {
+    const response = await httpClient.post(`/v1/investments/${investmentId}/buy`, {
       amount,
       shares
     });
@@ -52,7 +52,7 @@ const realInvestService = {
   },
 
   async sellStock(investmentId, amount, shares) {
-    const response = await httpClient.post(`/v1/invest/${investmentId}/sell`, {
+    const response = await httpClient.post(`/v1/investments/${investmentId}/sell`, {
       amount,
       shares
     });
@@ -250,9 +250,9 @@ const hybridInvestService = {
   // ✅ USAR ENDPOINT REAL para detalles de inversión
   getInvestmentDetail: realInvestService.getInvestmentDetail,
   
-  // Usar mock para compra/venta
-  buyStock: mockInvestService.buyStock,
-  sellStock: mockInvestService.sellStock,
+  // ✅ USAR ENDPOINTS REALES para compra/venta
+  buyStock: realInvestService.buyStock,
+  sellStock: realInvestService.sellStock,
   
   // ✅ USAR ENDPOINT REAL para búsqueda
   searchStocks: realInvestService.searchStocks
