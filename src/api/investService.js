@@ -259,4 +259,4 @@ const hybridInvestService = {
 };
 
 // Exportar el servicio apropiado según la configuración
-export default USE_MOCK_DATA ? hybridInvestService : realInvestService; 
+export default USE_MOCK_DATA ? mockInvestService : hybridInvestService; 
