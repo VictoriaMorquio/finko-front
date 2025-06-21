@@ -234,6 +234,34 @@ const formatCurrency = (value) => {
     text-align: center; padding: 50px 20px; font-size: 16px; color: #555;
 }
 
+/* Estilo del botón para coincidir con otros botones fucsia de la app */
+.action-button-container :deep(.btn-primary) {
+  width: 100% !important;
+  padding: 15px !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: #FF007F !important; /* Color fucsia */
+  color: white !important;
+}
+
+.action-button-container :deep(.btn-primary:hover:not(:disabled)) {
+  background-color: #E60072 !important; /* Un poco más oscuro al pasar el ratón */
+}
+
+.action-button-container :deep(.btn-primary:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #CCCCCC !important;
+}
+
+.action-button-container :deep(.btn-primary:not(:disabled)) {
+  background-color: #FF007F !important;
+}
+
 @media (max-width: 360px) {
   .form-title { font-size: 22px; }
 }
