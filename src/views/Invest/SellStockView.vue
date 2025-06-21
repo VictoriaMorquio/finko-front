@@ -160,8 +160,7 @@ const handleSellStock = async () => {
     successMessage.value = result.message || `Venta de ${shares.toFixed(6)} acciones realizada exitosamente. Total: ${formatCurrency(amount)}`;
     showSuccessModal.value = true;
     
-    // Actualizar datos en background
-    investStore.fetchInvestmentDetail(investmentId);
+    // Actualizar datos globales en background
     investStore.fetchInvestmentsDashboard();
     
   } catch (error) {

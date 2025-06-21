@@ -1,7 +1,8 @@
 <template>
   <div class="line-chart-container">
     <apexchart
-      v-if="!isLoading && series.length > 0"
+      v-if="!isLoading && series.length > 0 && chartReady"
+      :key="chartKey"
       :options="chartOptions"
       :series="series"
       :height="height"
@@ -23,7 +24,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, nextTick, watch } from 'vue'
+
+const chartReady = ref(false)
+const chartKey = ref(0)
 
 const props = defineProps({
   data: {
@@ -63,6 +67,27 @@ const series = computed(() => {
     data: props.data
   }]
 })
+
+// Inicializar el gráfico después del montaje
+onMounted(async () => {
+  await nextTick()
+  setTimeout(() => {
+    chartReady.value = true
+  }, 100)
+})
+
+// Reinicializar el gráfico cuando cambian los datos
+watch(() => props.data, () => {
+  if (props.data && props.data.length > 0) {
+    chartKey.value += 1
+    chartReady.value = false
+    nextTick(() => {
+      setTimeout(() => {
+        chartReady.value = true
+      }, 50)
+    })
+  }
+}, { deep: true })
 
 const chartOptions = computed(() => {
   // Calcular el rango de fechas para determinar el formato de etiquetas

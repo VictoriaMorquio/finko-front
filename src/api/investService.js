@@ -18,7 +18,7 @@ const monthLabels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Se
 // Servicios reales para API
 const realInvestService = {
   async getInvestmentsDashboard(filter) {
-    const response = await httpClient.get('/v1/invest/dashboard', { filter });
+    const response = await httpClient.get('/v1/investments/dashboard', { filter });
     return response;
   },
 
