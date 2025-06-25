@@ -16,7 +16,10 @@
         <!-- Imagen de celebración con animación -->
         <div class="celebration-container">
           <div class="celebration-glow"></div>
-          <div class="celebration-icon">{{ icon }}</div>
+          <img :src="celebrationImageSrc" 
+               alt="¡Transacción exitosa!" 
+               class="celebration-image"
+               @error="handleImageError">
         </div>
 
         <!-- Contenido del mensaje -->
@@ -55,7 +58,7 @@
 
 <script setup>
 import BaseButton from '@/components/common/BaseButton.vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
   isVisible: {
@@ -70,10 +73,7 @@ const props = defineProps({
     type: String,
     default: 'La operación se ha completado correctamente.'
   },
-  icon: {
-    type: String,
-    default: '✅'
-  },
+
   transactionType: {
     type: String,
     default: 'transaction' // 'buy', 'sell', 'transaction'
@@ -81,6 +81,9 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
+
+// Imagen de celebración cargada dinámicamente
+const celebrationImageSrc = ref('/images/levelCompleted.png');
 
 const showTransactionInfo = computed(() => {
   return props.transactionType === 'buy' || props.transactionType === 'sell';
@@ -99,6 +102,24 @@ const getSuccessTitle = () => {
 
 const closeModal = () => {
   emit('close');
+};
+
+const handleImageError = (event) => {
+  console.warn('Error cargando imagen de celebración:', event);
+  // Fallback: usar el ícono original si la imagen falla
+  event.target.style.display = 'none';
+  // Mostrar un emoji como fallback
+  const container = event.target.parentElement;
+  if (container && !container.querySelector('.fallback-icon')) {
+    const fallbackIcon = document.createElement('div');
+    fallbackIcon.className = 'fallback-icon celebration-icon';
+    fallbackIcon.textContent = '🎉';
+    fallbackIcon.style.fontSize = '80px';
+    fallbackIcon.style.position = 'relative';
+    fallbackIcon.style.zIndex = '1';
+    fallbackIcon.style.animation = 'bounce 1s ease-in-out infinite alternate';
+    container.appendChild(fallbackIcon);
+  }
 };
 </script>
 
@@ -236,11 +257,14 @@ const closeModal = () => {
   }
 }
 
-.celebration-icon {
-  font-size: 80px;
+.celebration-image {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
   position: relative;
   z-index: 1;
   animation: bounce 1s ease-in-out infinite alternate;
+  border-radius: 50%;
 }
 
 @keyframes bounce {
@@ -387,8 +411,9 @@ const closeModal = () => {
     font-size: 14px; 
   }
   
-  .celebration-icon {
-    font-size: 60px;
+  .celebration-image {
+    width: 100px;
+    height: 100px;
   }
 }
 

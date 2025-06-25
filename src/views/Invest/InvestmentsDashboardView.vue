@@ -42,12 +42,7 @@
         style="margin-bottom: 5px;"
       />
       <div v-else class="no-chart-data">
-        🔍 DEBUG: No hay datos del gráfico
-        <br>ChartData es array: {{ Array.isArray(chartDebug.chartData) }}
-        <br>ChartData length: {{ chartDebug.chartData?.length || 0 }}
-        <br>Primer elemento: {{ chartDebug.chartData?.[0] }}
-        <br>ChartDataForLineChart length: {{ chartDataForLineChart?.length || 0 }}
-        <br>Primer punto LineChart: {{ chartDataForLineChart?.[0] }}
+        No hay datos disponibles para mostrar
       </div>
 
       <h2 class="section-title-invest" style="margin-top: 30px;">Inversiones</h2>
@@ -266,6 +261,16 @@ const getPerformanceColor = (value, forLine = false) => {
     text-align: center;
     color: #777;
     padding: 30px 0;
+}
+
+.no-chart-data {
+    text-align: center;
+    color: #777;
+    padding: 40px 20px;
+    font-size: 16px;
+    background-color: #F8F9FA;
+    border-radius: 8px;
+    margin: 10px 0;
 }
 .loading-message, .error-message-centered {
   text-align: center;

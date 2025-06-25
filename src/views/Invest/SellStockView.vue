@@ -61,7 +61,7 @@
       :is-visible="showSuccessModal"
       :title="'¡Venta Exitosa!'"
       :message="successMessage"
-      :icon="'💰'"
+      transaction-type="sell"
       @close="handleModalClose"
     />
   </div>

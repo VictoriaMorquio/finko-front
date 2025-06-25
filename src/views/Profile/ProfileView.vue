@@ -43,7 +43,7 @@
         </section>
 
         <section class="achievements-section" v-if="user.achievements && user.achievements.length > 0">
-            <h2 class="section-title-profile">Achievements</h2>
+            <h2 class="section-title-profile">Logros</h2>
             <div class="achievements-carousel horizontal-scroll">
                 <AchievementCard
                     v-for="achievement in user.achievements"
