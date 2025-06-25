@@ -36,14 +36,7 @@ const navItems = [
       <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z"/>
     </svg>`
   },
-  {
-    name: 'Chat',
-    route: '/chat',
-    label: 'Resuelve Dudas',
-    icon: `<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
-    </svg>`
-  },
+
   {
     name: 'Profile',
     route: '/profile',
