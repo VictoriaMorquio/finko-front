@@ -1,12 +1,18 @@
 <template>
   <div class="achievement-card" :style="{ backgroundColor: bgColor }">
     <img 
+      v-if="getImageUrl(image)"
       :src="getImageUrl(image)" 
       :alt="title" 
       class="achievement-image-full"
       @error="onImageError"
       @load="onImageLoad"
     >
+    <!-- Placeholder cuando no hay imagen -->
+    <div v-else class="achievement-placeholder">
+      <div class="achievement-icon">🏆</div>
+      <div class="achievement-text">{{ title || 'Logro' }}</div>
+    </div>
   </div>
 </template>
 
@@ -26,8 +32,9 @@ const getImageUrl = (imagePath) => {
   console.log('🖼️ ACHIEVEMENT - Image path recibido:', imagePath);
   
   if (!imagePath) {
-    console.log('🖼️ ACHIEVEMENT - No hay imagen, usando default');
-    return '/images/achievement-default.png';
+    console.log('🖼️ ACHIEVEMENT - No hay imagen, usando placeholder');
+    // En lugar de una imagen inexistente, usar null para mostrar un placeholder
+    return null;
   }
   
   // Si la URL ya es completa (empieza con http), la usamos tal como está
@@ -43,15 +50,15 @@ const getImageUrl = (imagePath) => {
     return fullUrl;
   }
   
-  // Si no tiene formato reconocido, usar imagen por defecto
-  console.log('🖼️ ACHIEVEMENT - Formato no reconocido, usando default');
-  return '/images/achievement-default.png';
+  // Si no tiene formato reconocido, usar null
+  console.log('🖼️ ACHIEVEMENT - Formato no reconocido, usando placeholder');
+  return null;
 };
 
 const onImageError = (event) => {
   console.error('🖼️ ACHIEVEMENT - Error cargando imagen:', event.target.src);
-  console.error('🖼️ ACHIEVEMENT - Usando imagen de fallback');
-  event.target.src = '/images/achievement-default.png';
+  // Simplemente ocultar la imagen que falló - el template mostrará el placeholder
+  event.target.style.display = 'none';
 };
 
 const onImageLoad = (event) => {
@@ -75,6 +82,33 @@ const onImageLoad = (event) => {
   height: 100%;
   object-fit: cover; /* La imagen cubre todo el espacio manteniendo proporción */
   border-radius: inherit; /* Hereda el border-radius del contenedor */
+}
+
+.achievement-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+}
+
+.achievement-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.achievement-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8B5A2B;
+  line-height: 1.2;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 @media (max-width: 360px) {
