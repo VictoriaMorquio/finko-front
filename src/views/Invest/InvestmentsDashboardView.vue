@@ -36,7 +36,7 @@
         v-if="chartDebug.chartData && Array.isArray(chartDebug.chartData) && chartDebug.chartData.length > 0"
         :data="chartDataForLineChart"
         :height="180"
-        :color="getPerformanceColor(chartDebug.mainPercentage, true)"
+        :color="'#F72152'"
         :showGrid="false"
         :showTooltip="true"
         style="margin-bottom: 5px;"
@@ -179,31 +179,43 @@ const getPerformanceColor = (value, forLine = false) => {
 
 .time-filters {
   display: flex;
-  justify-content: space-around; /* Distribuir espacio */
-  background-color: #F5F3F7; /* Lila/gris pálido */
-  border-radius: 25px; /* Muy redondeado */
-  padding: 5px;
+  gap: 8px;
   margin-bottom: 20px;
+  padding: 0 2px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.time-filters::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .time-filter-btn {
-  flex: 1; /* Ocupar espacio equitativamente */
-  padding: 8px 10px;
-  border: none;
-  background-color: transparent;
-  border-radius: 20px; /* Redondeado interno */
+  padding: 8px 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 20px;
+  background-color: #FFFFFF;
+  color: #666666;
   font-size: 14px;
   font-weight: 500;
-  color: #5C3A47; /* Texto rosa oscuro/púrpura */
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 40px;
   text-align: center;
 }
 
+.time-filter-btn:hover {
+  background-color: #F5F5F5;
+  border-color: #D0D0D0;
+}
+
 .time-filter-btn.active {
-  background-color: #FFFFFF;
-  color: #111111; /* Texto negro para activo */
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  background-color: #F72152; /* Rosa fucsia como la gráfica */
+  color: #FFFFFF; /* Texto blanco para activo */
+  border-color: #F72152;
+  box-shadow: 0 2px 4px rgba(247, 33, 82, 0.2);
 }
 
 .performance-summary {
