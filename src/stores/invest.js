@@ -24,7 +24,7 @@ export const useInvestStore = defineStore('invest', {
     error: null,
   }),
   actions: {
-    async fetchInvestmentsDashboard(filter = 'allTime') {
+    async fetchInvestmentsDashboard(filter = 'ALL') {
       this.loading = true;
       this.error = null;
       try {

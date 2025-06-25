@@ -10,7 +10,7 @@
       <!-- <template #left-icon> <button @click="$router.go(-1)">←</button> </template> -->
     </PageHeader>
 
-    <main class="investments-content" v-if="dashboardData">
+    <main class="investments-content" v-if="chartDebug">
       <h2 class="section-title-invest">Rendimiento</h2> <!-- Renombrado para evitar conflicto -->
       <div class="time-filters">
         <button
@@ -25,29 +25,29 @@
       </div>
 
       <div class="performance-summary">
-        <div class="label">{{ dashboardData.performanceLabel }}</div>
-        <div class="main-percentage" :class="getPerformanceColor(dashboardData.mainPercentage)">
-            {{ formatMainPercentage(dashboardData.mainPercentage) }}
+        <div class="label">{{ chartDebug.performanceLabel }}</div>
+        <div class="main-percentage" :class="getPerformanceColor(chartDebug.mainPercentage)">
+            {{ formatMainPercentage(chartDebug.mainPercentage) }}
         </div>
-        <div class="sub-info" v-html="dashboardData.subInfo"></div>
+        <div class="sub-info" v-html="chartDebug.subInfo"></div>
       </div>
 
       <LineChart
-        v-if="dashboardData.chartData.series && dashboardData.chartData.series[0].data.length"
-        :series="dashboardData.chartData.series"
-        :categories="dashboardData.chartData.categories"
-        chartHeight="180"
-        :lineColor="getPerformanceColor(dashboardData.mainPercentage, true)"
-        :showXAxisLabels="true"
-        :showYAxisLabels="false"
+        v-if="chartDebug.chartData && Array.isArray(chartDebug.chartData) && chartDebug.chartData.length > 0"
+        :data="chartDataForLineChart"
+        :height="180"
+        :color="getPerformanceColor(chartDebug.mainPercentage, true)"
         :showGrid="false"
-        curve="smooth"
+        :showTooltip="true"
         style="margin-bottom: 5px;"
       />
-      <div class="chart-labels" v-if="dashboardData.chartData.categories.length">
-        <span v-for="(label, index) in dashboardData.chartData.categories" :key="index">
-            {{ label }}
-        </span>
+      <div v-else class="no-chart-data">
+        🔍 DEBUG: No hay datos del gráfico
+        <br>ChartData es array: {{ Array.isArray(chartDebug.chartData) }}
+        <br>ChartData length: {{ chartDebug.chartData?.length || 0 }}
+        <br>Primer elemento: {{ chartDebug.chartData?.[0] }}
+        <br>ChartDataForLineChart length: {{ chartDataForLineChart?.length || 0 }}
+        <br>Primer punto LineChart: {{ chartDataForLineChart?.[0] }}
       </div>
 
       <h2 class="section-title-invest" style="margin-top: 30px;">Inversiones</h2>
@@ -60,7 +60,7 @@
         />
       </div>
       <div v-else class="no-investments">No tienes inversiones activas.</div>
-    </main>
+      </main>
 
     <div v-if="investStore.loading && !dashboardData" class="loading-message">Cargando inversiones...</div>
     <div v-if="investStore.error && !dashboardData" class="error-message-centered">{{ investStore.error }}</div>
@@ -77,16 +77,51 @@ import PageHeader from '@/components/common/PageHeader.vue';
 import LineChart from '@/components/common/LineChart.vue';
 import InvestmentItem from '@/components/invest/InvestmentItem.vue';
 
+
 const router = useRouter();
 const investStore = useInvestStore();
 
 const dashboardData = computed(() => investStore.dashboardData);
-const activeFilter = ref('allTime'); // 'allTime', '1year', '1month'
+const activeFilter = ref('1D'); // Cambio: usar '1D' como defecto
+
+// Debug computed para verificar datos del gráfico
+const chartDebug = computed(() => {
+  const data = dashboardData.value;
+  if (data) {
+    console.log('🎯 Dashboard data en componente:', data);
+    console.log('📊 Chart data:', data.chartData);
+    console.log('📈 Series existe:', !!data.chartData?.series);
+    console.log('🔢 Primera serie existe:', !!data.chartData?.series?.[0]);
+    console.log('📊 Datos de primera serie:', data.chartData?.series?.[0]?.data);
+    console.log('🏷️ Categories:', data.chartData?.categories);
+  }
+  return data;
+});
+
+// Computed para convertir datos al formato que espera LineChart
+const chartDataForLineChart = computed(() => {
+  const data = chartDebug.value;
+  console.log('🔧 chartDataForLineChart - data:', data);
+  console.log('🔧 chartDataForLineChart - chartData:', data?.chartData);
+  
+  // El backend devuelve chartData como array directo: [{date, x, y}, ...]
+  if (!data?.chartData || !Array.isArray(data.chartData) || data.chartData.length === 0) {
+    console.log('🔧 chartDataForLineChart - returning empty array');
+    return [];
+  }
+  
+  // Ya está en el formato correcto que espera LineChart
+  const result = data.chartData; // Ya tiene formato [{x: timestamp, y: value}, ...]
+  
+  console.log('🔧 chartDataForLineChart - result:', result);
+  return result;
+});
 
 const timeFilters = [
-  { label: 'Desde el inicio', value: 'allTime' },
-  { label: '1 año', value: '1year' },
-  { label: '1 mes', value: '1month' },
+  { label: '1D', value: '1D' },
+  { label: '1M', value: '1M' },
+  { label: '1Y', value: '1Y' },
+  { label: 'ALL', value: 'ALL' },
 ];
 
 onMounted(() => {

@@ -1,8 +1,6 @@
 <template>
   <div class="investment-item" @click="$emit('selected', investment.id)">
-    <div class="item-icon">
-      <img :src="investment.icon" :alt="investment.name">
-    </div>
+    
     <div class="item-details">
       <div class="item-name">{{ investment.name }}</div>
       <div class="item-category">{{ investment.category }}</div>

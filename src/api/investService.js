@@ -18,7 +18,15 @@ const monthLabels = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Se
 // Servicios reales para API
 const realInvestService = {
   async getInvestmentsDashboard(filter) {
-    const response = await httpClient.get('/v1/investments/dashboard', { filter });
+    console.log('📊 Llamando endpoint de dashboard:', `/v1/performance/client/${filter}`);
+    const response = await httpClient.get(`/v1/performance/client/${filter}`);
+    console.log('📡 Respuesta del dashboard:', response);
+    console.log('📈 Estructura de chartData:', response.chartData);
+    console.log('📊 Es array:', Array.isArray(response.chartData));
+    console.log('🔢 Número de elementos:', response.chartData?.length);
+    if (response.chartData?.length > 0) {
+      console.log('📊 Primer elemento:', response.chartData[0]);
+    }
     return response;
   },
 
@@ -85,21 +93,28 @@ const mockInvestService = {
         let data = JSON.parse(JSON.stringify(mockInvestmentsDashboard)); // Clonar para no modificar original
         // Simular cambio de datos de gráfica según filtro
         let numPoints, categories;
-        if (filter === '1year') {
+        if (filter === '1Y') {
             numPoints = 12;
             categories = monthLabels;
             data.performanceLabel = "Ganancias y pérdidas (1 Año)";
             data.mainPercentage = parseFloat((Math.random() * 20 - 5).toFixed(1)); // +/-
             data.subInfo = `Último año <span class="percentage">${data.mainPercentage >= 0 ? '+' : ''}${data.mainPercentage}%</span>`;
-        } else if (filter === '1month') {
+        } else if (filter === '1M') {
             numPoints = 30; // Podrían ser días
             categories = Array.from({length: 30}, (_, i) => `${i+1}`);
             data.performanceLabel = "Ganancias y pérdidas (1 Mes)";
             data.mainPercentage = parseFloat((Math.random() * 10 - 3).toFixed(1));
             data.subInfo = `Último mes <span class="percentage">${data.mainPercentage >= 0 ? '+' : ''}${data.mainPercentage}%</span>`;
-        } else { // allTime (desde el inicio)
+        } else if (filter === '1D') {
+            numPoints = 24; // Horas del día
+            categories = Array.from({length: 24}, (_, i) => `${i}:00`);
+            data.performanceLabel = "Ganancias y pérdidas (1 Día)";
+            data.mainPercentage = parseFloat((Math.random() * 5 - 2).toFixed(1));
+            data.subInfo = `Último día <span class="percentage">${data.mainPercentage >= 0 ? '+' : ''}${data.mainPercentage}%</span>`;
+        } else { // ALL (desde el inicio)
             numPoints = mockInvestmentsDashboard.chartData.categories.length || 7; // O 7 si está vacío
             categories = mockInvestmentsDashboard.chartData.categories.length ? mockInvestmentsDashboard.chartData.categories : ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul"];
+            data.performanceLabel = "Ganancias y pérdidas";
             // Los datos iniciales de mockInvestmentsDashboard ya son "desde el inicio"
         }
         data.chartData.series[0].data = generateRandomChartData(numPoints);
@@ -244,8 +259,8 @@ const mockInvestService = {
 
 // 🔧 SERVICIO HÍBRIDO: Real para búsqueda y detalles, Mock para el resto
 const hybridInvestService = {
-  // Usar mock para dashboard
-  getInvestmentsDashboard: mockInvestService.getInvestmentsDashboard,
+  // ✅ USAR ENDPOINT REAL para dashboard
+  getInvestmentsDashboard: realInvestService.getInvestmentsDashboard,
   
   // ✅ USAR ENDPOINT REAL para detalles de inversión
   getInvestmentDetail: realInvestService.getInvestmentDetail,

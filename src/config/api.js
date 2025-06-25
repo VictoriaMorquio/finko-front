@@ -43,7 +43,9 @@ export const API_CONFIG = {
       // ✅ ENDPOINT UNIFICADO IMPLEMENTADO
       SEARCH: '/v1/investments/search', // Maneja tanto lista como búsqueda
       // ✅ ENDPOINT DE DETALLE IMPLEMENTADO
-      DETAIL: '/v1/investments/{investmentId}/details' // Detalle con datos históricos
+      DETAIL: '/v1/investments/{investmentId}/details', // Detalle con datos históricos
+      // ✅ ENDPOINT DE PERFORMANCE DASHBOARD IMPLEMENTADO
+      PERFORMANCE: '/v1/performance/client/{filter}' // Dashboard de rendimiento con filtros
     }
   }
 }

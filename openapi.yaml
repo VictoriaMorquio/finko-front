@@ -1,0 +1,1511 @@
+openapi: 3.0.3
+info:
+  title: Finko API
+  description: |
+    ## API completa para la aplicación Finko
+    
+    Finko es una plataforma innovadora de educación financiera e inversiones que combina:
+    
+    - 🎓 **Sistema de Aprendizaje Gamificado**: Lecciones interactivas, quizzes y sistema de repasos espaciados
+    - 💰 **Plataforma de Inversiones**: Búsqueda, análisis y transacciones de instrumentos financieros
+    - 📊 **Dashboard de Rendimiento**: Seguimiento en tiempo real del portfolio del usuario
+    - 🔐 **Gestión de Usuarios**: Sistema completo de autenticación y perfiles
+    - 🆘 **Soporte al Cliente**: Sistema integrado de tickets y comunicación
+    
+    ### Características principales:
+    - Autenticación JWT segura
+    - Sistema de gamificación con monedas y logros
+    - Análisis técnico con gráficos interactivos
+    - Educación financiera progresiva
+    - Soporte multimoneda
+    
+    ### Notas técnicas:
+    - Todos los endpoints requieren autenticación JWT excepto los marcados como públicos
+    - Las imágenes se procesan automáticamente para optimización
+    - Los datos financieros se actualizan en tiempo real
+    - Sistema de cache inteligente para mejor rendimiento
+  version: 1.0.0
+  contact:
+    name: Equipo Finko
+    email: support@finko.com
+    url: https://finko.com/contact
+  license:
+    name: Proprietary
+  termsOfService: https://finko.com/terms
+
+servers:
+  - url: https://localhost:8443/api
+    description: |
+      Servidor de desarrollo directo (Spring Boot)
+      
+      **Configuración requerida:**
+      - Puerto: 8443 (HTTPS)
+      - Certificado autofirmado (aceptar manualmente en navegador)
+      - Configuración CORS para localhost:5173
+  - url: /api
+    description: |
+      Proxy de desarrollo (Vite)
+      
+      **Ventajas:**
+      - Evita problemas de CORS
+      - Certificado SSL manejado automáticamente
+      - Hot reload y debugging mejorado
+      - Configurado en vite.config.js
+
+security:
+  - BearerAuth: []
+
+paths:
+  # === AUTENTICACIÓN ===
+  /v1/auth/login:
+    post:
+      tags: [Autenticación]
+      summary: Iniciar sesión
+      description: |
+        Autentica al usuario en la plataforma Finko usando email/username y contraseña.
+        
+        ### Funcionalidades:
+        - Valida credenciales contra la base de datos
+        - Genera token JWT con tiempo de vida configurable
+        - Registra la actividad de login para auditoría
+        - Devuelve información básica del perfil del usuario
+        
+        ### Consideraciones de seguridad:
+        - Implementa rate limiting para prevenir ataques de fuerza bruta
+        - Las contraseñas se validan usando bcrypt
+        - Los tokens incluyen claims de usuario y permisos
+        - Soporte para autenticación de dos factores (2FA) en el futuro
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        description: Credenciales de acceso del usuario
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Email o nombre de usuario registrado en la plataforma
+                  example: "usuario@finko.com"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  maxLength: 128
+                  description: Contraseña del usuario (mínimo 8 caracteres)
+                  example: "miPassword123"
+                rememberMe:
+                  type: boolean
+                  description: Si se debe recordar la sesión por más tiempo
+                  default: false
+      responses:
+        '200':
+          description: Login exitoso - Usuario autenticado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Token JWT para autenticación en requests posteriores
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  user:
+                    $ref: '#/components/schemas/User'
+                  expiresIn:
+                    type: integer
+                    description: Tiempo de vida del token en segundos
+                    example: 3600
+                  refreshToken:
+                    type: string
+                    description: Token para renovar la sesión cuando expire
+                    example: "rt_abc123..."
+        '401':
+          description: Credenciales incorrectas - Email/username o contraseña inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                invalid_credentials:
+                  summary: Credenciales incorrectas
+                  value:
+                    message: "Email o contraseña incorrectos"
+                    code: 401
+                    details: "Las credenciales proporcionadas no coinciden con ningún usuario registrado"
+                account_locked:
+                  summary: Cuenta bloqueada
+                  value:
+                    message: "Cuenta temporalmente bloqueada"
+                    code: 401
+                    details: "Demasiados intentos fallidos. Intenta de nuevo en 15 minutos"
+        '400':
+          description: Datos inválidos - Formato de request incorrecto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Demasiados intentos - Rate limit excedido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/auth/signup:
+    post:
+      tags: [Autenticación]
+      summary: Registro de usuario
+      operationId: signup
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullname, username, email, password]
+              properties:
+                fullname:
+                  type: string
+                  minLength: 2
+                  example: "Juan Pérez"
+                username:
+                  type: string
+                  minLength: 3
+                  pattern: "^[a-zA-Z0-9_]+$"
+                  example: "juanperez"
+                email:
+                  type: string
+                  format: email
+                  example: "juan@example.com"
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  maxLength: 128
+                  example: "miPassword123"
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '409':
+          description: Email o username ya en uso
+        '400':
+          description: Datos inválidos
+
+  /v1/auth/logout:
+    post:
+      tags: [Autenticación]
+      summary: Cerrar sesión
+      operationId: logout
+      responses:
+        '200':
+          description: Sesión cerrada exitosamente
+        '401':
+          description: Token inválido
+
+  /v1/auth/me:
+    get:
+      tags: [Autenticación]
+      summary: Obtener perfil actual
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Perfil del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: No autenticado
+    put:
+      tags: [Autenticación]
+      summary: Actualizar perfil
+      operationId: updateProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                dateOfBirth:
+                  type: string
+                  format: date
+                occupation:
+                  type: string
+                investmentExperience:
+                  type: string
+                riskTolerance:
+                  type: string
+                investmentGoals:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Datos inválidos
+        '409':
+          description: Email o username ya en uso
+
+  /v1/auth/me/password:
+    put:
+      tags: [Autenticación]
+      summary: Cambiar contraseña
+      operationId: changePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword, confirmNewPassword]
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                newPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  maxLength: 128
+                confirmNewPassword:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Contraseña actualizada
+        '400':
+          description: Datos inválidos o contraseñas no coinciden
+        '401':
+          description: Contraseña actual incorrecta
+
+  /v1/auth/password-reset:
+    post:
+      tags: [Autenticación]
+      summary: Solicitar reset de contraseña
+      operationId: requestPasswordReset
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [emailOrUsername]
+              properties:
+                emailOrUsername:
+                  type: string
+                  example: "usuario@finko.com"
+      responses:
+        '200':
+          description: Email de recuperación enviado
+        '404':
+          description: Usuario no encontrado
+
+  /v1/auth/password-reset/confirm:
+    post:
+      tags: [Autenticación]
+      summary: Confirmar nueva contraseña
+      operationId: confirmNewPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token:
+                  type: string
+                  example: "reset_token_123456"
+                newPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  maxLength: 128
+      responses:
+        '200':
+          description: Contraseña actualizada exitosamente
+        '400':
+          description: Token inválido o contraseña inválida
+
+  /v1/auth/me/profile-pic:
+    put:
+      tags: [Autenticación]
+      summary: Subir foto de perfil
+      operationId: uploadProfilePic
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [profilePic]
+              properties:
+                profilePic:
+                  type: string
+                  format: binary
+                  description: Imagen de perfil (máximo 5MB)
+      responses:
+        '200':
+          description: Foto de perfil actualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  profilePicUrl:
+                    type: string
+                    format: uri
+                  message:
+                    type: string
+        '400':
+          description: Archivo inválido o muy grande
+
+  /v1/auth/me/account:
+    delete:
+      tags: [Autenticación]
+      summary: Eliminar cuenta
+      operationId: deleteAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, confirmDelete]
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                confirmDelete:
+                  type: string
+                  enum: ["DELETE_MY_ACCOUNT"]
+                  example: "DELETE_MY_ACCOUNT"
+      responses:
+        '200':
+          description: Cuenta eliminada exitosamente
+        '400':
+          description: Texto de confirmación incorrecto
+        '401':
+          description: Contraseña incorrecta
+
+  # === APRENDIZAJE ===
+  /v1/learn/dashboard:
+    get:
+      tags: [Aprendizaje]
+      summary: Dashboard de aprendizaje
+      operationId: getLearnDashboard
+      responses:
+        '200':
+          description: Dashboard de aprendizaje
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LearnDashboard'
+
+  /v1/learn/units/{unitId}/skills:
+    get:
+      tags: [Aprendizaje]
+      summary: Habilidades de una unidad
+      operationId: getUnitSkills
+      parameters:
+        - name: unitId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de habilidades
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnitSkills'
+
+  /v1/learn/skills/{skillId}/lessons:
+    get:
+      tags: [Aprendizaje]
+      summary: Lecciones de una habilidad
+      operationId: getSkillLessons
+      parameters:
+        - name: skillId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de lecciones
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkillLessons'
+
+  /v1/learn/lessons/{lessonId}/intro:
+    get:
+      tags: [Aprendizaje]
+      summary: Introducción de lección
+      operationId: getLessonIntro
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Introducción de la lección
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonIntro'
+
+  /v1/learn/lessons/{lessonId}/steps:
+    get:
+      tags: [Aprendizaje]
+      summary: Pasos de una lección
+      operationId: getLessonSteps
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de pasos de la lección
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonSteps'
+
+  /v1/learn/lessons/{lessonId}/steps/{stepId}:
+    get:
+      tags: [Aprendizaje]
+      summary: Paso específico de lección
+      operationId: getLessonStep
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: stepId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paso de la lección
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonStep'
+
+  /v1/learn/levels/{levelId}/completed:
+    get:
+      tags: [Aprendizaje]
+      summary: Datos de nivel completado
+      operationId: getLevelCompletedData
+      parameters:
+        - name: levelId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Datos del nivel completado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LevelCompleted'
+
+  /v1/learn/quiz/submit:
+    post:
+      tags: [Aprendizaje]
+      summary: Enviar respuesta de quiz
+      operationId: submitQuiz
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lessonId, stepId, answer]
+              properties:
+                lessonId:
+                  type: string
+                stepId:
+                  type: string
+                answer:
+                  oneOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                    - type: array
+                      items:
+                        type: string
+      responses:
+        '200':
+          description: Respuesta procesada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  correct:
+                    type: boolean
+                  explanation:
+                    type: string
+                  nextStepId:
+                    type: string
+
+  /v1/learn/lessons/{lessonId}/review/status:
+    get:
+      tags: [Aprendizaje]
+      summary: Estado de repaso
+      operationId: getReviewStatus
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Estado del sistema de repaso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewStatus'
+
+  /v1/learn/lessons/{lessonId}/review/next:
+    get:
+      tags: [Aprendizaje]
+      summary: Siguiente paso de repaso
+      operationId: getNextReviewStep
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Siguiente paso para repasar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonStep'
+
+  /v1/learn/lessons/{lessonId}/review/reset:
+    post:
+      tags: [Aprendizaje]
+      summary: Reiniciar cola de repaso
+      operationId: resetReviewQueue
+      parameters:
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cola de repaso reiniciada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  # === INVERSIONES ===
+  /v1/investments/search:
+    get:
+      tags: [Inversiones]
+      summary: Búsqueda/lista de inversiones
+      description: |
+        Endpoint unificado para obtener listas de inversiones disponibles y realizar búsquedas específicas.
+        
+        ### Funcionalidades:
+        - **Sin parámetro 'q'**: Devuelve lista completa de inversiones disponibles
+        - **Con parámetro 'q'**: Realiza búsqueda por símbolo, nombre de empresa o sector
+        - **Paginación**: Soporte completo para navegación de grandes datasets
+        - **Ordenamiento**: Los resultados se ordenan por relevancia y capitalización de mercado
+        
+        ### Casos de uso:
+        - Pantalla principal de inversiones (sin filtro)
+        - Barra de búsqueda en tiempo real
+        - Explorador de mercados por categoría
+        - Análisis comparativo de múltiples activos
+        
+        ### Notas técnicas:
+        - Los precios se actualizan cada 15 segundos en horario de mercado
+        - Soporta búsqueda fuzzy para nombres de empresas
+        - Cache de 30 segundos para mejorar rendimiento
+        - Máximo 1000 elementos por página para proteger el servidor
+      operationId: searchInvestments
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 50
+          description: |
+            Término de búsqueda para filtrar inversiones.
+            
+            **Formatos soportados:**
+            - Símbolo del ticker: "AAPL", "MSFT"
+            - Nombre de empresa: "Apple", "Microsoft"
+            - Sector: "Technology", "Healthcare"
+            - Múltiples términos: "Apple technology"
+            
+            **Nota:** Si se omite, devuelve lista completa paginada
+          example: "AAPL"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: |
+            Número de página para paginación (base 0).
+            
+            **Ejemplo:** Para obtener la tercera página, usar `page=2`
+          example: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 200
+          description: |
+            Número de elementos por página.
+            
+            **Recomendaciones:**
+            - Para listas: 50-200 elementos
+            - Para búsquedas: 10-50 elementos
+            - Para análisis: 200-500 elementos
+          example: 50
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [symbol, name, price, change, volume, marketCap]
+            default: marketCap
+          description: Campo por el cual ordenar los resultados
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Dirección del ordenamiento
+      responses:
+        '200':
+          description: Lista de inversiones
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestmentSearchResponse'
+
+  /v1/investments/{investmentId}/details:
+    get:
+      tags: [Inversiones]
+      summary: Detalle de inversión
+      operationId: getInvestmentDetail
+      parameters:
+        - name: investmentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: interval
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [1day, 1week, 1month, 3months, 6months, 1year]
+            default: "1month"
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Detalle de la inversión
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestmentDetail'
+
+  /v1/investments/{investmentId}/buy:
+    post:
+      tags: [Inversiones]
+      summary: Comprar inversión
+      operationId: buyInvestment
+      parameters:
+        - name: investmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, shares]
+              properties:
+                amount:
+                  type: number
+                  format: float
+                  minimum: 0
+                shares:
+                  type: number
+                  format: float
+                  minimum: 0
+      responses:
+        '200':
+          description: Compra realizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+
+  /v1/investments/{investmentId}/sell:
+    post:
+      tags: [Inversiones]
+      summary: Vender inversión
+      operationId: sellInvestment
+      parameters:
+        - name: investmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, shares]
+              properties:
+                amount:
+                  type: number
+                  format: float
+                  minimum: 0
+                shares:
+                  type: number
+                  format: float
+                  minimum: 0
+      responses:
+        '200':
+          description: Venta realizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+
+  # === RENDIMIENTO ===
+  /v1/performance/client/{filter}:
+    get:
+      tags: [Rendimiento]
+      summary: Dashboard de rendimiento
+      operationId: getPerformanceDashboard
+      parameters:
+        - name: filter
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [1D, 1M, 1Y, ALL]
+          description: Filtro temporal
+      responses:
+        '200':
+          description: Dashboard de rendimiento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceDashboard'
+
+  # === SOPORTE ===
+  /v1/support/contact:
+    post:
+      tags: [Soporte]
+      summary: Contactar soporte
+      operationId: contactSupport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, message]
+              properties:
+                subject:
+                  type: string
+                  minLength: 5
+                  maxLength: 200
+                message:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+                category:
+                  type: string
+                  enum: [general, technical, billing, feedback]
+                priority:
+                  type: string
+                  enum: [low, normal, high]
+                  default: normal
+      responses:
+        '200':
+          description: Mensaje enviado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  ticketId:
+                    type: string
+
+  /v1/support/contact-info:
+    get:
+      tags: [Soporte]
+      summary: Información de contacto
+      operationId: getSupportContactInfo
+      security: []
+      responses:
+        '200':
+          description: Información de contacto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    format: email
+                  phone:
+                    type: string
+                  address:
+                    type: string
+                  hours:
+                    type: string
+                  socialMedia:
+                    type: object
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      description: |
+        Modelo completo del usuario de la plataforma Finko.
+        
+        Incluye información personal, preferencias de inversión, estadísticas de gamificación
+        y historial de logros del usuario.
+      required: [id, username, email, fullname]
+      properties:
+        id:
+          type: string
+          description: Identificador único del usuario en el sistema
+          example: "user123"
+        username:
+          type: string
+          description: Nombre de usuario único para login y visualización
+          pattern: "^[a-zA-Z0-9_]{3,30}$"
+          example: "juanperez"
+        fullname:
+          type: string
+          description: Nombre completo del usuario para personalización
+          minLength: 2
+          maxLength: 100
+          example: "Juan Pérez González"
+        email:
+          type: string
+          format: email
+          description: Email principal para comunicaciones y recuperación de cuenta
+          example: "juan.perez@example.com"
+        profilePic:
+          type: string
+          format: uri
+          description: URL de la foto de perfil del usuario (optimizada automáticamente)
+          example: "/images/profiles/user123.jpg"
+        phone:
+          type: string
+          description: Número de teléfono para contacto y verificación
+          pattern: "^\\+?[1-9]\\d{1,14}$"
+          example: "+34666123456"
+        dateOfBirth:
+          type: string
+          format: date
+          description: Fecha de nacimiento para verificación de edad y personalización
+          example: "1990-05-15"
+        occupation:
+          type: string
+          description: Ocupación profesional del usuario
+          maxLength: 100
+          example: "Desarrollador de Software"
+        investmentExperience:
+          type: string
+          description: Nivel de experiencia en inversiones para personalizar recomendaciones
+          enum: [Principiante, Intermedio, Avanzado]
+          example: "Principiante"
+        riskTolerance:
+          type: string
+          description: Tolerancia al riesgo para ajustar estrategias de inversión
+          enum: [Conservador, Moderado, Agresivo]
+          example: "Moderado"
+        investmentGoals:
+          type: array
+          description: Objetivos de inversión del usuario para personalización
+          items:
+            type: string
+            enum: 
+              - "Ahorro para jubilación"
+              - "Crecimiento a largo plazo"
+              - "Ingresos pasivos"
+              - "Preservación de capital"
+              - "Educación financiera"
+              - "Compra de vivienda"
+              - "Emergencias"
+          example: ["Ahorro para jubilación", "Crecimiento a largo plazo"]
+        joinDate:
+          type: string
+          format: date
+          description: Fecha de registro en la plataforma
+          example: "2024-01-15"
+        stats:
+          $ref: '#/components/schemas/UserStats'
+        achievements:
+          type: array
+          description: Lista de logros desbloqueados por el usuario
+          items:
+            $ref: '#/components/schemas/Achievement'
+
+    UserStats:
+      type: object
+      properties:
+        coins:
+          type: integer
+        currentStreak:
+          type: integer
+        levelsCompleted:
+          type: integer
+        totalInvested:
+          type: number
+          format: float
+        totalGains:
+          type: number
+          format: float
+        completedLessons:
+          type: integer
+        level:
+          type: integer
+        xp:
+          type: integer
+
+    Achievement:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        unlockedAt:
+          type: string
+          format: date-time
+        isUnlocked:
+          type: boolean
+        category:
+          type: string
+
+    LearnDashboard:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+            level:
+              type: integer
+            coins:
+              type: integer
+            xp:
+              type: integer
+            streak:
+              type: integer
+        units:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearningUnit'
+
+    LearningUnit:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        progress:
+          type: number
+          format: float
+        totalSkills:
+          type: integer
+        completedSkills:
+          type: integer
+        image:
+          type: string
+
+    UnitSkills:
+      type: object
+      properties:
+        unitId:
+          type: string
+        title:
+          type: string
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/Skill'
+
+    Skill:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        image:
+          type: string
+        progress:
+          type: number
+          format: float
+
+    SkillLessons:
+      type: object
+      properties:
+        skillId:
+          type: string
+        title:
+          type: string
+        lessons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lesson'
+
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        type:
+          type: string
+        totalSteps:
+          type: integer
+        coinsReward:
+          type: integer
+        xpReward:
+          type: integer
+        progress:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [not_started, in_progress, completed]
+
+    LessonIntro:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        firstStepId:
+          type: string
+        firstStepType:
+          type: string
+        totalSteps:
+          type: integer
+        estimatedTime:
+          type: string
+        coinsReward:
+          type: integer
+        xpReward:
+          type: integer
+
+    LessonSteps:
+      type: object
+      properties:
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/LessonStep'
+        totalSteps:
+          type: integer
+
+    LessonStep:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [content, quiz, matching, sorting, drag_drop]
+        title:
+          type: string
+        content:
+          type: string
+        image:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+        correctAnswer:
+          oneOf:
+            - type: string
+            - type: number
+            - type: array
+              items:
+                type: string
+        totalSteps:
+          type: integer
+        currentStepNumber:
+          type: integer
+        isLastStep:
+          type: boolean
+        progressPercentage:
+          type: number
+          format: float
+
+    LevelCompleted:
+      type: object
+      properties:
+        levelId:
+          type: string
+        title:
+          type: string
+        coinsEarned:
+          type: integer
+        xpEarned:
+          type: integer
+        achievements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Achievement'
+        nextLevel:
+          type: string
+
+    ReviewStatus:
+      type: object
+      properties:
+        hasStepsToReview:
+          type: boolean
+        totalStepsToReview:
+          type: integer
+        nextReviewDate:
+          type: string
+          format: date-time
+
+    InvestmentSearchResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Investment'
+        last:
+          type: boolean
+        number:
+          type: integer
+        totalPages:
+          type: integer
+        totalElements:
+          type: integer
+
+    Investment:
+      type: object
+      properties:
+        symbol:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+          format: float
+        change:
+          type: number
+          format: float
+        changePercent:
+          type: number
+          format: float
+        volume:
+          type: integer
+        marketCap:
+          type: integer
+          format: int64
+        currency:
+          type: string
+
+    InvestmentDetail:
+      type: object
+      properties:
+        id:
+          type: string
+        symbol:
+          type: string
+        name:
+          type: string
+        currentPrice:
+          type: number
+          format: float
+        change:
+          type: number
+          format: float
+        changePercent:
+          type: number
+          format: float
+        volume:
+          type: integer
+        marketCap:
+          type: integer
+          format: int64
+        description:
+          type: string
+        sector:
+          type: string
+        chartData:
+          $ref: '#/components/schemas/ChartData'
+        keyStats:
+          type: object
+        news:
+          type: array
+          items:
+            type: object
+
+    ChartData:
+      type: object
+      properties:
+        series:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              data:
+                type: array
+                items:
+                  type: number
+        categories:
+          type: array
+          items:
+            type: string
+
+    TransactionResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        transactionId:
+          type: string
+        amount:
+          type: number
+          format: float
+        shares:
+          type: number
+          format: float
+        executedPrice:
+          type: number
+          format: float
+        timestamp:
+          type: string
+          format: date-time
+
+    PerformanceDashboard:
+      type: object
+      properties:
+        totalValue:
+          type: number
+          format: float
+        totalGains:
+          type: number
+          format: float
+        totalGainsPercent:
+          type: number
+          format: float
+        dayChange:
+          type: number
+          format: float
+        dayChangePercent:
+          type: number
+          format: float
+        performanceLabel:
+          type: string
+        mainPercentage:
+          type: number
+          format: float
+        subInfo:
+          type: string
+        chartData:
+          $ref: '#/components/schemas/ChartData'
+        investments:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              symbol:
+                type: string
+              currentValue:
+                type: number
+                format: float
+              performance:
+                type: number
+                format: float
+              shares:
+                type: number
+                format: float
+
+    Error:
+      type: object
+      description: |
+        Modelo estándar para respuestas de error en toda la API.
+        
+        Proporciona información estructurada sobre errores para facilitar
+        el manejo por parte de los clientes y el debugging.
+      required: [message, code]
+      properties:
+        message:
+          type: string
+          description: Mensaje de error legible para el usuario final
+          example: "Email o contraseña incorrectos"
+        code:
+          type: integer
+          description: Código HTTP del error
+          example: 401
+        details:
+          type: string
+          description: Información técnica adicional para desarrolladores
+          example: "Las credenciales proporcionadas no coinciden con ningún usuario registrado"
+        timestamp:
+          type: string
+          format: date-time
+          description: Momento exacto en que ocurrió el error
+          example: "2024-01-15T10:30:00Z"
+        path:
+          type: string
+          description: Endpoint donde ocurrió el error
+          example: "/v1/auth/login"
+        requestId:
+          type: string
+          description: ID único de la petición para tracking
+          example: "req_12345"
+
+  responses:
+    UnauthorizedError:
+      description: Token de acceso faltante o inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFoundError:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    ValidationError:
+      description: Error de validación
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error' 
